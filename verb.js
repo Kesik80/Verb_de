@@ -1,5 +1,4 @@
-export default async function handler(req, res) {
-  // CORS
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
 
@@ -13,195 +12,163 @@ export default async function handler(req, res) {
     const r = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'ru,de;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ru-RU,ru;q=0.9,de;q=0.8',
         'Referer': 'https://www.verbformen.ru/',
       }
     });
-    if (!r.ok) return res.status(502).json({ error: `verbformen.ru вернул ${r.status}` });
+    if (!r.ok) return res.status(502).json({ error: `verbformen.ru ответил ${r.status}` });
     html = await r.text();
   } catch (e) {
-    return res.status(502).json({ error: `Не удалось получить страницу: ${e.message}` });
+    return res.status(502).json({ error: `Сеть: ${e.message}` });
   }
 
   try {
     const data = parse(html, w);
-    res.status(200).json(data);
+    return res.status(200).json(data);
   } catch (e) {
-    res.status(500).json({ error: `Ошибка парсинга: ${e.message}`, raw: html.slice(0, 500) });
+    return res.status(500).json({
+      error: `Парсинг: ${e.message}`,
+      htmlSnippet: html.slice(0, 1000)
+    });
   }
+};
+
+function stripTags(s) {
+  return s
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&shy;/g, '')
+    .replace(/&#(\d+);/g, (_, c) => String.fromCharCode(+c))
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-function text(html) {
-  return html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, (_, c) => String.fromCharCode(c)).trim();
-}
-
-function between(str, open, close, from = 0) {
-  const s = str.indexOf(open, from);
-  if (s === -1) return null;
-  const e = str.indexOf(close, s + open.length);
-  if (e === -1) return null;
-  return { val: str.slice(s + open.length, e), end: e + close.length };
-}
-
-function extractCells(tableHtml) {
-  const cells = [];
+function tableRows(tableHtml) {
+  const rows = [];
   let pos = 0;
   while (true) {
-    // find td or th
-    const td = tableHtml.indexOf('<td', pos);
-    const th = tableHtml.indexOf('<th', pos);
-    let start = -1;
-    let tag = '';
-    if (td === -1 && th === -1) break;
-    if (td === -1) { start = th; tag = 'th'; }
-    else if (th === -1) { start = td; tag = 'td'; }
-    else if (td < th) { start = td; tag = 'td'; }
-    else { start = th; tag = 'th'; }
-
-    const closeTag = `</${tag}>`;
-    const e = tableHtml.indexOf(closeTag, start);
-    if (e === -1) break;
-    const inner = tableHtml.slice(start, e + closeTag.length);
-    cells.push(text(inner));
-    pos = e + closeTag.length;
-  }
-  return cells;
-}
-
-function extractTableByHeading(html, heading) {
-  // Find section by h2/h3 containing heading text
-  const idx = html.indexOf(heading);
-  if (idx === -1) return null;
-  const tableStart = html.indexOf('<table', idx);
-  const tableEnd = html.indexOf('</table>', tableStart);
-  if (tableStart === -1 || tableEnd === -1) return null;
-  return html.slice(tableStart, tableEnd + '</table>'.length);
-}
-
-function parseConjTable(tableHtml) {
-  // Rows: pronoun | sg | pl  or  pronoun | form
-  const rows = {};
-  let pos = 0;
-  while (true) {
-    const trStart = tableHtml.indexOf('<tr', pos);
-    if (trStart === -1) break;
-    const trEnd = tableHtml.indexOf('</tr>', trStart);
-    if (trEnd === -1) break;
-    const rowHtml = tableHtml.slice(trStart, trEnd + '</tr>'.length);
-    const cells = extractCells(rowHtml);
-    pos = trEnd + '</tr>'.length;
-    if (cells.length >= 2) {
-      const pronoun = cells[0];
-      if (pronoun && pronoun.match(/^(ich|du|er|wir|ihr|sie|Sie|er\/sie\/es|er\s*\/\s*sie\s*\/\s*es)$/i)) {
-        rows[pronoun] = cells[1];
-      }
+    const rs = tableHtml.indexOf('<tr', pos);
+    if (rs === -1) break;
+    const re = tableHtml.indexOf('</tr>', rs);
+    if (re === -1) break;
+    const rowHtml = tableHtml.slice(rs, re);
+    pos = re + 5;
+    const cells = [];
+    let cp = 0;
+    while (true) {
+      const td = rowHtml.indexOf('<td', cp);
+      const th = rowHtml.indexOf('<th', cp);
+      let cs = -1, closeTag = '';
+      if (td === -1 && th === -1) break;
+      if (td === -1) { cs = th; closeTag = '</th>'; }
+      else if (th === -1) { cs = td; closeTag = '</td>'; }
+      else { cs = Math.min(td, th); closeTag = cs === td ? '</td>' : '</th>'; }
+      const ce = rowHtml.indexOf(closeTag, cs);
+      if (ce === -1) break;
+      cells.push(stripTags(rowHtml.slice(cs, ce)));
+      cp = ce + closeTag.length;
     }
+    if (cells.length) rows.push(cells);
   }
   return rows;
 }
 
-const PRONOUNS = ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'];
+function findTable(html, afterText) {
+  const idx = html.indexOf(afterText);
+  if (idx === -1) return null;
+  const ts = html.indexOf('<table', idx);
+  if (ts === -1 || ts - idx > 2000) return null;
+  const te = html.indexOf('</table>', ts);
+  if (te === -1) return null;
+  return html.slice(ts, te + 8);
+}
 
-function normalizeConj(raw) {
-  // Map whatever pronouns were found to standard set
+const PRONOUN_MAP = {
+  'ich': 'ich', 'du': 'du',
+  'er': 'er/sie/es', 'sie': 'er/sie/es', 'es': 'er/sie/es',
+  'er/sie/es': 'er/sie/es',
+  'wir': 'wir', 'ihr': 'ihr',
+  'sie/sie': 'sie/Sie',
+};
+
+function parseConjTable(tableHtml) {
   const result = {};
-  for (const [k, v] of Object.entries(raw)) {
-    const kl = k.toLowerCase().replace(/\s+/g, '');
-    if (kl === 'ich') result['ich'] = v;
-    else if (kl === 'du') result['du'] = v;
-    else if (kl.startsWith('er')) result['er/sie/es'] = v;
-    else if (kl === 'wir') result['wir'] = v;
-    else if (kl === 'ihr') result['ihr'] = v;
-    else if (kl === 'sie' || kl === 'sie/sie') result['sie/Sie'] = v;
+  for (const row of tableRows(tableHtml)) {
+    if (row.length < 2) continue;
+    const key = PRONOUN_MAP[row[0].toLowerCase().replace(/\s+/g, '')];
+    if (key) result[key] = row[1];
   }
   return result;
 }
 
 function parse(html, word) {
-  // 1. Infinitiv
   let infinitiv = word;
-  const infMatch = html.match(/class="[^"]*vInf[^"]*"[^>]*>([^<]+)</);
-  if (infMatch) infinitiv = infMatch[1].trim();
+  const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>([^<]{2,30})</);
+  if (infM) infinitiv = infM[1].trim();
 
-  // 2. Hauptformen  (ist · war · ist gewesen)
   let hauptformen = { praesens_3sg: '', praeteritum_3sg: '', partizip2: '' };
-  // verbformen.ru shows them in .rInf or in a special box
-  const hfMatch = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]*?)<\/p>/);
-  if (hfMatch) {
-    const hfText = text(hfMatch[1]);
-    const parts = hfText.split('·').map(s => s.trim()).filter(Boolean);
-    if (parts[0]) hauptformen.praesens_3sg = parts[0];
-    if (parts[1]) hauptformen.praeteritum_3sg = parts[1];
-    if (parts[2]) hauptformen.partizip2 = parts[2];
+  const hfM = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,300}?)<\/p>/);
+  if (hfM) {
+    const parts = stripTags(hfM[1]).split('·').map(s => s.trim()).filter(Boolean);
+    hauptformen = {
+      praesens_3sg: parts[0] || '',
+      praeteritum_3sg: parts[1] || '',
+      partizip2: parts[2] || ''
+    };
   }
 
-  // 3. Bedeutung
   let bedeutung = '';
-  const bMatch = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]*?)<\/[a-z]+>/);
-  if (bMatch) bedeutung = text(bMatch[1]);
+  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,200}?)<\//);
+  if (bM) bedeutung = stripTags(bM[1]);
 
-  // 4. Hilfsverb
   let hilfsverb = 'haben';
-  if (html.includes('Вспомогательный глагол: sein') || html.includes('>sein<') && html.includes('auxiliar')) {
-    hilfsverb = 'sein';
-  }
+  if (/hilfsverb[^<]{0,50}sein/i.test(html)) hilfsverb = 'sein';
 
-  // 5. Find tense sections by searching known German headings on the site
-  // verbformen.ru uses section headings like "Präsens", "Präteritum", etc.
-  const tenseMap = {
-    praesens:        ['Präsens', 'Настоящее время'],
-    praeteritum:     ['Präteritum', 'Прошедшее время (Präteritum)'],
-    perfekt:         ['Perfekt', 'Прошедшее время (Perfekt)'],
-    plusquamperfekt: ['Plusquamperfekt'],
-    futur1:          ['Futur I', 'Futur 1'],
-    konjunktiv2:     ['Konjunktiv II', 'Konjunktiv 2'],
-  };
+  const tenseSearches = [
+    { key: 'praesens',        needles: ['Präsens'] },
+    { key: 'praeteritum',     needles: ['Präteritum'] },
+    { key: 'perfekt',         needles: ['Perfekt'] },
+    { key: 'plusquamperfekt', needles: ['Plusquamperfekt'] },
+    { key: 'futur1',          needles: ['Futur I', 'Futur 1'] },
+    { key: 'konjunktiv2',     needles: ['Konjunktiv II', 'Konjunktiv 2'] },
+  ];
 
   const tenses = {};
-  for (const [key, headings] of Object.entries(tenseMap)) {
-    for (const h of headings) {
-      const tableHtml = extractTableByHeading(html, h);
-      if (tableHtml) {
-        const raw = parseConjTable(tableHtml);
-        if (Object.keys(raw).length > 0) {
-          tenses[key] = normalizeConj(raw);
-          break;
-        }
+  for (const { key, needles } of tenseSearches) {
+    for (const needle of needles) {
+      const t = findTable(html, needle);
+      if (t) {
+        const conj = parseConjTable(t);
+        if (Object.keys(conj).length >= 3) { tenses[key] = conj; break; }
       }
     }
   }
 
-  // 6. Imperativ
   let imperativ = {};
-  const impTable = extractTableByHeading(html, 'Imperativ') || extractTableByHeading(html, 'Повелительное наклонение');
-  if (impTable) {
-    const cells = extractCells(impTable);
-    // typically: du | form | — | ihr | form | —  or similar
-    for (let i = 0; i < cells.length - 1; i++) {
-      if (cells[i].toLowerCase() === 'du') imperativ['du'] = cells[i + 1];
-      if (cells[i].toLowerCase() === 'ihr') imperativ['ihr'] = cells[i + 1];
-      if (cells[i] === 'Sie') imperativ['Sie'] = cells[i + 1];
+  const impT = findTable(html, 'Imperativ');
+  if (impT) {
+    for (const row of tableRows(impT)) {
+      if (row.length < 2) continue;
+      const p = row[0].toLowerCase();
+      if (p === 'du') imperativ['du'] = row[1];
+      else if (p === 'ihr') imperativ['ihr'] = row[1];
+      else if (p === 'sie') imperativ['Sie'] = row[1];
     }
   }
 
-  // 7. Beispiele
   const beispiele = [];
-  const bspRegex = /class="[^"]*bsp[^"]*"[^>]*>([\s\S]*?)<\/[a-z]+>/g;
+  const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,200}?)<\//g;
   let bm;
-  while ((bm = bspRegex.exec(html)) !== null && beispiele.length < 3) {
-    const t = text(bm[1]);
-    if (t.length > 5) beispiele.push(t);
+  while ((bm = bspRe.exec(html)) !== null && beispiele.length < 3) {
+    const t = stripTags(bm[1]);
+    if (t.length > 5 && !beispiele.includes(t)) beispiele.push(t);
   }
 
   return {
-    infinitiv,
-    hauptformen,
-    bedeutung,
-    hilfsverb,
-    tenses,
-    imperativ,
-    beispiele,
+    infinitiv, hauptformen, bedeutung, hilfsverb,
+    tenses, imperativ, beispiele,
     source: `https://www.verbformen.ru/spryazhenie/?w=${encodeURIComponent(word)}`
   };
 }
