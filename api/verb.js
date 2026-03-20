@@ -5,31 +5,32 @@ module.exports = async function handler(req, res) {
   const { w } = req.query;
   if (!w) return res.status(400).json({ error: 'Параметр w обязателен' });
 
-  const url = `https://www.verbformen.ru/spryazhenie/?w=${encodeURIComponent(w)}`;
+  const verb = w.trim().toLowerCase();
+  const url = `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(verb)}.htm`;
 
   let html;
   try {
     const r = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml',
         'Accept-Language': 'ru-RU,ru;q=0.9,de;q=0.8',
         'Referer': 'https://www.verbformen.ru/',
       }
     });
-    if (!r.ok) return res.status(502).json({ error: `verbformen.ru ответил ${r.status}` });
+    if (!r.ok) return res.status(502).json({ error: `verbformen.ru ответил ${r.status} для: ${url}` });
     html = await r.text();
   } catch (e) {
     return res.status(502).json({ error: `Сеть: ${e.message}` });
   }
 
   try {
-    const data = parse(html, w);
+    const data = parse(html, verb);
     return res.status(200).json(data);
   } catch (e) {
     return res.status(500).json({
       error: `Парсинг: ${e.message}`,
-      htmlSnippet: html.slice(0, 1000)
+      htmlSnippet: html.slice(0, 2000)
     });
   }
 };
@@ -79,7 +80,7 @@ function findTable(html, afterText) {
   const idx = html.indexOf(afterText);
   if (idx === -1) return null;
   const ts = html.indexOf('<table', idx);
-  if (ts === -1 || ts - idx > 2000) return null;
+  if (ts === -1 || ts - idx > 3000) return null;
   const te = html.indexOf('</table>', ts);
   if (te === -1) return null;
   return html.slice(ts, te + 8);
@@ -104,28 +105,33 @@ function parseConjTable(tableHtml) {
 }
 
 function parse(html, word) {
+  // Infinitiv
   let infinitiv = word;
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>([^<]{2,30})</);
   if (infM) infinitiv = infM[1].trim();
 
+  // Hauptformen (з · war · ist gewesen)
   let hauptformen = { praesens_3sg: '', praeteritum_3sg: '', partizip2: '' };
-  const hfM = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,300}?)<\/p>/);
+  const hfM = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,400}?)<\/p>/);
   if (hfM) {
     const parts = stripTags(hfM[1]).split('·').map(s => s.trim()).filter(Boolean);
     hauptformen = {
-      praesens_3sg: parts[0] || '',
+      praesens_3sg:   parts[0] || '',
       praeteritum_3sg: parts[1] || '',
-      partizip2: parts[2] || ''
+      partizip2:      parts[2] || ''
     };
   }
 
+  // Bedeutung
   let bedeutung = '';
-  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,200}?)<\//);
+  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,300}?)<\//);
   if (bM) bedeutung = stripTags(bM[1]);
 
+  // Hilfsverb
   let hilfsverb = 'haben';
-  if (/hilfsverb[^<]{0,50}sein/i.test(html)) hilfsverb = 'sein';
+  if (/sein<\/a>\s*\(Hilfsverb\)|Hilfsverb[^<]{0,80}>sein/i.test(html)) hilfsverb = 'sein';
 
+  // Tenses
   const tenseSearches = [
     { key: 'praesens',        needles: ['Präsens'] },
     { key: 'praeteritum',     needles: ['Präteritum'] },
@@ -146,6 +152,7 @@ function parse(html, word) {
     }
   }
 
+  // Imperativ
   let imperativ = {};
   const impT = findTable(html, 'Imperativ');
   if (impT) {
@@ -158,8 +165,9 @@ function parse(html, word) {
     }
   }
 
+  // Beispiele
   const beispiele = [];
-  const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,200}?)<\//g;
+  const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,300}?)<\//g;
   let bm;
   while ((bm = bspRe.exec(html)) !== null && beispiele.length < 3) {
     const t = stripTags(bm[1]);
@@ -169,6 +177,6 @@ function parse(html, word) {
   return {
     infinitiv, hauptformen, bedeutung, hilfsverb,
     tenses, imperativ, beispiele,
-    source: `https://www.verbformen.ru/spryazhenie/?w=${encodeURIComponent(word)}`
+    source: `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm`
   };
 }
