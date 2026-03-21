@@ -23,6 +23,24 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
+  if (req.query.debug === '2') {
+    // Show all rInf matches
+    const rInfAll = [...html.matchAll(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,300}?)<\/p>/g)];
+    const rInfResults = rInfAll.map(m => m[1].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,150));
+    // Show tails before each table
+    const tails = [];
+    let pos = 0;
+    while (true) {
+      const ts = html.indexOf('<table', pos);
+      if (ts === -1 || tails.length > 25) break;
+      const te = html.indexOf('</table>', ts);
+      const tail = html.slice(Math.max(0,ts-150),ts).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(-80);
+      tails.push(tail);
+      pos = (te === -1 ? ts+6 : te+8);
+    }
+    return res.status(200).json({ rInfResults, tails });
+  }
+
   try {
     return res.status(200).json(parse(html, verb));
   } catch (e) {
