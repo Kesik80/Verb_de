@@ -23,6 +23,20 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
+  if (req.query.debug === '4') {
+    // Find all occurrences of "perfekt" in html and show surrounding context
+    const hits = [];
+    let pos = 0;
+    const needle = 'perfekt';
+    while (true) {
+      const idx = html.toLowerCase().indexOf(needle, pos);
+      if (idx === -1 || hits.length > 20) break;
+      hits.push(html.slice(Math.max(0, idx-50), idx+100).replace(/\s+/g,' '));
+      pos = idx + needle.length;
+    }
+    return res.status(200).json({ htmlLen: html.length, hits });
+  }
+
   try {
     return res.status(200).json(parse(html, verb));
   } catch (e) {
