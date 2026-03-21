@@ -340,6 +340,66 @@
 
   .no-data { color: var(--muted); font-size: 13px; font-style: italic; }
 
+  .main-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .main-table thead tr {
+    background: var(--surface2);
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .main-table th {
+    padding: 12px 16px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-align: left;
+  }
+
+  .main-table th:first-child {
+    color: var(--muted);
+    width: 90px;
+  }
+
+  .main-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+
+  .main-table tbody tr:last-child { border-bottom: none; }
+  .main-table tbody tr:hover { background: rgba(79,195,247,0.05); }
+
+  td.main-pronoun {
+    padding: 10px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  td.main-form {
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  td.main-form:nth-child(2) { color: var(--text); }
+  td.main-form:nth-child(3) { color: var(--yellow); }
+  td.main-form:nth-child(4) { color: var(--green); }
+
   @media (max-width: 600px) {
     .verb-header { flex-direction: column; }
     .verb-right { text-align: left; }
@@ -453,15 +513,41 @@ function render(d) {
       .map(f => `<span class="hf">${f}</span>`)
       .join(' · ');
 
-  const tenseCards = TENSES.map(t => {
+  // Main table: Pronomen | Präsens | Präteritum | Perfekt
+  const mainTenses = [
+    { key: 'praesens',    name: 'Präsens' },
+    { key: 'praeteritum', name: 'Präteritum' },
+    { key: 'perfekt',     name: 'Perfekt' },
+  ];
+  const mainRows = PRONOUNS.map(p => {
+    const cells = mainTenses.map(t => {
+      const form = d.tenses?.[t.key]?.[p] || '—';
+      return `<td class="main-form">${form}</td>`;
+    }).join('');
+    return `<tr><td class="main-pronoun">${p}</td>${cells}</tr>`;
+  }).join('');
+  const mainTable = `
+    <div class="main-card">
+      <table class="main-table">
+        <thead>
+          <tr>
+            <th></th>
+            ${mainTenses.map(t => `<th>${t.name}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>${mainRows}</tbody>
+      </table>
+    </div>`;
+
+  // Secondary cards for remaining tenses
+  const secondaryTenses = TENSES.filter(t => !['praesens','praeteritum','perfekt'].includes(t.key));
+  const tenseCards = secondaryTenses.map(t => {
     const conj = d.tenses?.[t.key];
     if (!conj || Object.keys(conj).length === 0) return '';
-
     const rows = PRONOUNS.map(p => {
       const form = conj[p] || '—';
       return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span></div>`;
     }).join('');
-
     return `
       <div class="tense-card">
         <div class="tense-name">
@@ -515,9 +601,8 @@ function render(d) {
       </div>
     </div>
 
-    <div class="tenses-grid">
-      ${tenseCards || '<div class="no-data">Спряжение не найдено. Попробуй другой глагол.</div>'}
-    </div>
+    ${mainTable}
+    ${tenseCards ? `<div class="tenses-grid">${tenseCards}</div>` : ''}
 
     ${(imperativHtml || bspHtml) ? `<div class="info-grid">${imperativHtml}${bspHtml}</div>` : ''}
 
