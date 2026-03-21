@@ -359,11 +359,11 @@
   }
 
   .main-table th {
-    padding: 12px 16px;
+    padding: 10px 10px;
     font-family: 'Unbounded', sans-serif;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 400;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--accent);
     text-align: left;
@@ -371,7 +371,7 @@
 
   .main-table th:first-child {
     color: var(--muted);
-    width: 90px;
+    width: 70px;
   }
 
   .main-table tbody tr {
@@ -383,22 +383,29 @@
   .main-table tbody tr:hover { background: rgba(79,195,247,0.05); }
 
   td.main-pronoun {
-    padding: 10px 16px;
+    padding: 10px 10px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 11px;
     white-space: nowrap;
   }
 
   td.main-form {
-    padding: 10px 16px;
-    font-size: 15px;
+    padding: 10px 10px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text);
+    word-break: break-word;
   }
 
   td.main-form:nth-child(2) { color: var(--text); }
   td.main-form:nth-child(3) { color: var(--yellow); }
   td.main-form:nth-child(4) { color: var(--green); }
+
+  @media (max-width: 400px) {
+    td.main-pronoun { font-size: 10px; padding: 8px 6px; }
+    td.main-form { font-size: 12px; padding: 8px 6px; }
+    .main-table th { font-size: 8px; padding: 8px 6px; letter-spacing: 0; }
+  }
 
   @media (max-width: 600px) {
     .verb-header { flex-direction: column; }
