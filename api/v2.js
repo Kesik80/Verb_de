@@ -24,17 +24,21 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.query.debug === '4') {
-    // Find all occurrences of "perfekt" in html and show surrounding context
-    const hits = [];
+    // Find mp3 perfekt link, then measure distance to next table
+    const mp3key = '/konjugation/indikativ/perfekt/';
+    const results = [];
     let pos = 0;
-    const needle = 'perfekt';
     while (true) {
-      const idx = html.toLowerCase().indexOf(needle, pos);
-      if (idx === -1 || hits.length > 20) break;
-      hits.push(html.slice(Math.max(0, idx-50), idx+100).replace(/\s+/g,' '));
-      pos = idx + needle.length;
+      const mp3pos = html.indexOf(mp3key, pos);
+      if (mp3pos === -1) break;
+      const ts = html.indexOf('<table', mp3pos);
+      const dist = ts === -1 ? -1 : ts - mp3pos;
+      const between = ts === -1 ? '' : html.slice(mp3pos, ts).replace(/\s+/g,' ').slice(0, 300);
+      const tableStart = ts === -1 ? '' : html.slice(ts, ts+200).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,100);
+      results.push({ mp3pos, tablePos: ts, dist, between, tableStart });
+      pos = mp3pos + 1;
     }
-    return res.status(200).json({ htmlLen: html.length, hits });
+    return res.status(200).json({ results });
   }
 
   try {
