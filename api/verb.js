@@ -169,13 +169,18 @@ function parse(html, word) {
   }
 
   // Hauptformen — parse rInf "ist · war · ist gewesen"
-  // Split by · and clean
   const rInfParts = rInfStr.split('·').map(s => s.trim()).filter(Boolean);
+  // Third part might be missing from rInf — use Perfekt er/sie/es as fallback
+  const perfekt3sg = tenses.perfekt?.['er/sie/es'] || '';
   const hauptformen = {
     praesens_3sg:    rInfParts[0] || tenses.praesens?.['er/sie/es'] || '',
     praeteritum_3sg: rInfParts[1] || tenses.praeteritum?.['er/sie/es'] || '',
-    partizip2:       rInfParts[2] || '',
+    partizip2:       rInfParts[2] || perfekt3sg,
   };
+  // Rebuild rInfStr with all 3 parts for display
+  if (hauptformen.praesens_3sg && hauptformen.praeteritum_3sg && hauptformen.partizip2) {
+    rInfStr = [hauptformen.praesens_3sg, hauptformen.praeteritum_3sg, hauptformen.partizip2].join(' · ');
+  }
 
   // Imperativ — marker "Императив", occurrence 0
   // Row structure from debug: "- sei (du)", "wir seien", "(ihr) seid", "seien Sie"
