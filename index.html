@@ -547,7 +547,7 @@ function render(d) {
     </div>`;
 
   // Secondary cards for remaining tenses
-  const secondaryTenses = TENSES.filter(t => !['praesens','praeteritum','perfekt'].includes(t.key));
+  const secondaryTenses = TENSES.filter(t => t.key === 'konjunktiv2');
   const tenseCards = secondaryTenses.map(t => {
     const conj = d.tenses?.[t.key];
     if (!conj || Object.keys(conj).length === 0) return '';
@@ -565,31 +565,8 @@ function render(d) {
       </div>`;
   }).join('');
 
-  // Imperativ
   let imperativHtml = '';
-  if (d.imperativ && Object.keys(d.imperativ).length > 0) {
-    const items = Object.entries(d.imperativ).map(([p, f]) => `
-      <div class="imper-item">
-        <span class="imper-pron">${p}</span>
-        <span class="imper-form">${f || '—'}</span>
-      </div>`).join('');
-    imperativHtml = `
-      <div class="info-card">
-        <h3>Imperativ</h3>
-        <div class="imper-grid">${items}</div>
-      </div>`;
-  }
-
-  // Beispiele
   let bspHtml = '';
-  if (d.beispiele?.length) {
-    const items = d.beispiele.map(b => `<div class="bsp-item">${b}</div>`).join('');
-    bspHtml = `
-      <div class="info-card">
-        <h3>Beispiele</h3>
-        ${items}
-      </div>`;
-  }
 
   const tags = [];
   if (d.niveau) tags.push(d.niveau);
