@@ -23,22 +23,25 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
-  if (req.query.debug === '2') {
-    // Show all rInf matches
-    const rInfAll = [...html.matchAll(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,300}?)<\/p>/g)];
-    const rInfResults = rInfAll.map(m => m[1].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,150));
-    // Show tails before each table
-    const tails = [];
+  if (req.query.debug === '3') {
+    // Show 500 chars RAW before each table (not stripped)
+    const info = [];
     let pos = 0;
+    let idx = 0;
     while (true) {
       const ts = html.indexOf('<table', pos);
-      if (ts === -1 || tails.length > 25) break;
+      if (ts === -1 || idx > 25) break;
       const te = html.indexOf('</table>', ts);
-      const tail = html.slice(Math.max(0,ts-150),ts).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(-80);
-      tails.push(tail);
-      pos = (te === -1 ? ts+6 : te+8);
+      if (te === -1) break;
+      // raw before — show links/hrefs
+      const rawBefore = html.slice(Math.max(0, ts - 500), ts).slice(-300);
+      // first row of table stripped
+      const firstRow = html.slice(ts, Math.min(ts+200, te)).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,100);
+      info.push({ idx, rawBefore, firstRow });
+      pos = te + 8;
+      idx++;
     }
-    return res.status(200).json({ rInfResults, tails });
+    return res.status(200).json(info);
   }
 
   try {
@@ -51,24 +54,22 @@ module.exports = async function handler(req, res) {
 function strip(s) {
   return s.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ')
     .replace(/&shy;/g,'').replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-    .replace(/\s+/g,' ').trim();
+    .replace(/&middot;/g,'·').replace(/\s+/g,' ').trim();
 }
 
-// Get all tables with stripped text before them (400 chars) and their content
-function getAllTables(html) {
-  const tables = [];
+// Find table preceded by a link whose href contains urlKey
+function findTableByMp3(html, mp3key) {
   let pos = 0;
   while (true) {
     const ts = html.indexOf('<table', pos);
     if (ts === -1) break;
     const te = html.indexOf('</table>', ts);
     if (te === -1) break;
-    const before = html.slice(Math.max(0, ts - 400), ts)
-      .replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-    tables.push({ before, html: html.slice(ts, te + 8) });
+    const before = html.slice(Math.max(0, ts - 300), ts);
+    if (before.includes(mp3key)) return html.slice(ts, te + 8);
     pos = te + 8;
   }
-  return tables;
+  return null;
 }
 
 function rowCells(rowHtml) {
@@ -113,119 +114,113 @@ function parseConjTable(tableHtml) {
 }
 
 function parse(html, word) {
-  const tables = getAllTables(html);
-
-  // Helper: find table whose "before" text ends with one of the markers
-  function findByMarker(markers, occurrence = 0) {
-    let count = 0;
-    for (const t of tables) {
-      const tail = t.before.slice(-80); // last 80 chars of context
-      for (const m of markers) {
-        if (tail.includes(m)) {
-          if (count === occurrence) return t.html;
-          count++;
-          break;
-        }
-      }
-    }
-    return null;
-  }
-
   // Infinitiv
   let infinitiv = word;
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Hauptformen from rInf: "ist · war · ist gewesen"
-  // There are multiple rInf elements — find the one with verb forms (contains ·)
-  // The correct one has German verb forms, not level info like "A1 · неправильный"
-  let rInfStr = '';
-  const rInfAll = [...html.matchAll(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,600}?)<\/p>/g)];
-  for (const m of rInfAll) {
-    const s = strip(m[1]);
-    const parts = s.split('·').map(p => p.trim()).filter(Boolean);
-    // Valid rInf has 3 parts that look like German verb forms (contain lowercase German letters)
-    if (parts.length >= 3 && /^[a-zäöüß]/.test(parts[0])) {
-      rInfStr = s;
-      break;
-    }
-  }
-
-  // Bedeutung — full Russian meaning from vMng
+  // Bedeutung — Russian meaning, take longest vMng match
   let bedeutung = '';
-  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,600}?)<\/[a-z]/);
-  if (bM) bedeutung = strip(bM[1]).replace(/^🇷🇺\s*/, '').replace(/^[^а-яёА-ЯЁa-z]+/, '').trim();
+  const bAll = [...html.matchAll(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,600}?)<\/[a-z]/g)];
+  for (const m of bAll) {
+    const t = strip(m[1]).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
+    if (t.length > bedeutung.length) bedeutung = t;
+  }
+  // Trim to first sentence or 80 chars
+  bedeutung = bedeutung.replace(/\s*».*$/, '').trim().slice(0, 100);
 
+  // Level A1/B2 etc — from the "A1 · неправильный · sein" rInf
+  let niveau = '';
+  const nivM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
+  if (nivM) niveau = nivM[1];
+
+  // Unregelmäßig
+  const unregelmaessig = /неправильн/i.test(html);
+
+  // Hilfsverb — detect from page text
   let hilfsverb = 'haben';
 
-  // Tense config: markers that appear right before the table in "before" text
-  // From debug: "Презенс", "Претеритум", "Перфект", "Плюсквам.", "Футурум I", "Конъюнктив II"
-  // Präsens and Präteritum appear twice (compact + full) → use occurrence 1
-  // Konj II appears twice → use occurrence 1
-  // Others appear once in the full section
+  // Tense tables — identified by MP3 link URL before each table
+  // From debug tails: "ive/sein.mp3", "ein.mp3" etc — need the path segment
+  // MP3 URLs follow pattern: /konjugation/indikativ/praesens/sein.mp3
   const tenseConfig = [
-    { key:'praesens',        markers:['Презенс'],       occ:1 },
-    { key:'praeteritum',     markers:['Претеритум'],    occ:1 },
-    { key:'perfekt',         markers:['Перфект'],       occ:0 },
-    { key:'plusquamperfekt', markers:['Плюсквам'],      occ:0 },
-    { key:'futur1',          markers:['Футурум I'],     occ:0 },
-    { key:'konjunktiv2',     markers:['Конъюнктив II'], occ:1 },
+    { key:'praesens',        mp3:'/indikativ/praesens/' },
+    { key:'praeteritum',     mp3:'/indikativ/praeteritum/' },
+    { key:'perfekt',         mp3:'/indikativ/perfekt/' },
+    { key:'plusquamperfekt', mp3:'/indikativ/plusquamperfekt/' },
+    { key:'futur1',          mp3:'/indikativ/futur1/' },
+    { key:'konjunktiv2',     mp3:'/konjunktiv/praeteritum/' },
   ];
 
   const tenses = {};
-  for (const {key, markers, occ} of tenseConfig) {
-    const t = findByMarker(markers, occ);
-    if (t) {
-      const conj = parseConjTable(t);
+  for (const {key, mp3} of tenseConfig) {
+    // Find ALL tables preceded by this mp3 key, take the LAST one (full section)
+    let found = null;
+    let pos = 0;
+    while (true) {
+      const ts = html.indexOf('<table', pos);
+      if (ts === -1) break;
+      const te = html.indexOf('</table>', ts);
+      if (te === -1) break;
+      const before = html.slice(Math.max(0, ts - 300), ts);
+      if (before.includes(mp3)) found = html.slice(ts, te + 8);
+      pos = te + 8;
+    }
+    if (found) {
+      const conj = parseConjTable(found);
       if (Object.keys(conj).length >= 3) {
         tenses[key] = conj;
-        if (key==='perfekt' && conj['ich'] && /^(habe|bin)\b/i.test(conj['ich'])) {
+        if (key==='perfekt' && conj['ich']) {
           hilfsverb = /^bin\b/i.test(conj['ich']) ? 'sein' : 'haben';
         }
       }
     }
   }
 
-  // Hauptformen — parse rInf "ist · war · ist gewesen"
-  const rInfParts = rInfStr.split('·').map(s => s.trim()).filter(Boolean);
-  // Third part might be missing from rInf — use Perfekt er/sie/es as fallback
-  const perfekt3sg = tenses.perfekt?.['er/sie/es'] || '';
+  // Hauptformen: build "ist · war · ist gewesen" from tenses
+  const p3 = tenses.praesens?.['er/sie/es'] || '';
+  const pt3 = tenses.praeteritum?.['er/sie/es'] || '';
+  const pf3 = tenses.perfekt?.['er/sie/es'] || '';
   const hauptformen = {
-    praesens_3sg:    rInfParts[0] || tenses.praesens?.['er/sie/es'] || '',
-    praeteritum_3sg: rInfParts[1] || tenses.praeteritum?.['er/sie/es'] || '',
-    partizip2:       rInfParts[2] || perfekt3sg,
+    praesens_3sg: p3,
+    praeteritum_3sg: pt3,
+    partizip2: pf3,
   };
-  // Rebuild rInfStr with all 3 parts for display
-  if (hauptformen.praesens_3sg && hauptformen.praeteritum_3sg && hauptformen.partizip2) {
-    rInfStr = [hauptformen.praesens_3sg, hauptformen.praeteritum_3sg, hauptformen.partizip2].join(' · ');
-  }
+  const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
 
-  // Imperativ — marker "Императив", occurrence 0
-  // Row structure from debug: "- sei (du)", "wir seien", "(ihr) seid", "seien Sie"
-  // Cells[0] is pronoun hint, cells[1] is form
-  // But for machen: "mach (du)", "machen wir", "macht (ihr)", "machen Sie"
-  // We need: du→cells[1] of row0, ihr→cells[1] of row2, Sie→cells[1] of row3
+  // Imperativ — last table before /imperativ/ mp3
+  const IMP_SLOTS = ['du','ihr','Sie'];
   let imperativ = {};
-  const impTable = findByMarker(['Императив'], 0);
-  if (impTable) {
+  let impFound = null;
+  let pos2 = 0;
+  while (true) {
+    const ts = html.indexOf('<table', pos2);
+    if (ts === -1) break;
+    const te = html.indexOf('</table>', ts);
+    if (te === -1) break;
+    const before = html.slice(Math.max(0, ts - 300), ts);
+    if (before.includes('/imperativ/')) impFound = html.slice(ts, te + 8);
+    pos2 = te + 8;
+  }
+  if (impFound) {
     const dataRows = [];
     let pos = 0;
     while (true) {
-      const rs = impTable.indexOf('<tr', pos);
+      const rs = impFound.indexOf('<tr', pos);
       if (rs===-1) break;
-      const re = impTable.indexOf('</tr>', rs);
+      const re = impFound.indexOf('</tr>', rs);
       if (re===-1) break;
-      const cells = rowCells(impTable.slice(rs,re));
+      const cells = rowCells(impFound.slice(rs,re));
       pos = re+5;
       if (cells.length===2) dataRows.push(cells);
     }
-    // 4 rows: du, wir, ihr, Sie
+    // 4 rows: du, wir, ihr, Sie — we want du(0), ihr(2), Sie(3)
     if (dataRows[0]) imperativ['du']  = dataRows[0][1];
     if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
     if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
   }
 
-  // Beispiele
+  // Beispiele — find example sentences
   const beispiele = [];
   const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,300}?)<\//g;
   let bm;
@@ -234,11 +229,10 @@ function parse(html, word) {
     if (t.length>5 && !beispiele.includes(t)) beispiele.push(t);
   }
 
-  // Level (A1, A2, B1...) and unregelmäßig
-  const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
-  const niveau = niveauM ? niveauM[1] : '';
-  const unregelmaessig = /unregelmäßig|неправильн/i.test(html);
-
-  return { infinitiv, rInfStr, hauptformen, bedeutung, niveau, hilfsverb, unregelmaessig, tenses, imperativ, beispiele,
-    source:`https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm` };
+  return {
+    infinitiv, rInfStr, hauptformen, bedeutung,
+    niveau, hilfsverb, unregelmaessig,
+    tenses, imperativ, beispiele,
+    source: `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm`
+  };
 }
