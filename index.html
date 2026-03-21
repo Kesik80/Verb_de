@@ -446,7 +446,9 @@ const PRONOUNS = ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'];
 function render(d) {
   const hf = d.hauptformen || {};
 
-  const hauptformenStr = [hf.praesens_3sg, hf.praeteritum_3sg, hf.partizip2]
+  // Build "ist · war · ist gewesen" from perfekt er/sie/es
+  const perfekt3sg = d.tenses?.perfekt?.['er/sie/es'] || '';
+  const hauptformenStr = [hf.praesens_3sg, hf.praeteritum_3sg, perfekt3sg]
     .filter(Boolean)
     .map(f => `<span class="hf">${f}</span>`)
     .join(' · ');
@@ -498,6 +500,7 @@ function render(d) {
 
   const tags = [];
   if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
+  if (d.unregelmaessig) tags.push('unregelmäßig');
 
   resultEl.innerHTML = `
     <div class="verb-header">
