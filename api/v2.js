@@ -24,21 +24,14 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.query.debug === '4') {
-    // Find mp3 perfekt link, then measure distance to next table
+    // Show raw HTML of perfekt table
     const mp3key = '/konjugation/indikativ/perfekt/';
-    const results = [];
-    let pos = 0;
-    while (true) {
-      const mp3pos = html.indexOf(mp3key, pos);
-      if (mp3pos === -1) break;
-      const ts = html.indexOf('<table', mp3pos);
-      const dist = ts === -1 ? -1 : ts - mp3pos;
-      const between = ts === -1 ? '' : html.slice(mp3pos, ts).replace(/\s+/g,' ').slice(0, 300);
-      const tableStart = ts === -1 ? '' : html.slice(ts, ts+200).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,100);
-      results.push({ mp3pos, tablePos: ts, dist, between, tableStart });
-      pos = mp3pos + 1;
-    }
-    return res.status(200).json({ results });
+    const mp3pos = html.indexOf(mp3key);
+    if (mp3pos === -1) return res.status(200).json({ error: 'mp3 not found' });
+    const ts = html.indexOf('<table', mp3pos);
+    const te = html.indexOf('</table>', ts);
+    const rawTable = ts === -1 ? 'no table' : html.slice(ts, te + 8);
+    return res.status(200).json({ dist: ts - mp3pos, rawTable });
   }
 
   try {
