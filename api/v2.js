@@ -50,20 +50,25 @@ function strip(s) {
     .replace(/&middot;/g,'·').replace(/\s+/g,' ').trim();
 }
 
-// Collect all tables with their preceding raw HTML (300 chars)
-function getAllTables(html) {
-  const tables = [];
+// Find the LAST table that appears after mp3key in html
+// Strategy: find mp3 link position, then find next <table> after it
+function findTableAfterMp3(html, mp3key) {
+  let result = null;
   let pos = 0;
   while (true) {
-    const ts = html.indexOf('<table', pos);
-    if (ts === -1) break;
+    const mp3pos = html.indexOf(mp3key, pos);
+    if (mp3pos === -1) break;
+    // Find next <table> after this mp3 link
+    const ts = html.indexOf('<table', mp3pos);
+    if (ts === -1) { pos = mp3pos + 1; continue; }
+    // Make sure table is within 500 chars of mp3 link
+    if (ts - mp3pos > 500) { pos = mp3pos + 1; continue; }
     const te = html.indexOf('</table>', ts);
     if (te === -1) break;
-    const before = html.slice(Math.max(0, ts - 800), ts);
-    tables.push({ before, html: html.slice(ts, te + 8) });
-    pos = te + 8;
+    result = html.slice(ts, te + 8);
+    pos = mp3pos + 1;
   }
-  return tables;
+  return result; // returns LAST match
 }
 
 function rowCells(rowHtml) {
@@ -108,17 +113,7 @@ function parseConjTable(tableHtml) {
 }
 
 function parse(html, word) {
-  const tables = getAllTables(html);
 
-  // MP3 links go to verbformen.DE — find tables by mp3 path
-  // Take LAST match for each key (full section comes after compact section)
-  function findLast(mp3path) {
-    let found = null;
-    for (const t of tables) {
-      if (t.before.includes(mp3path)) found = t.html;
-    }
-    return found;
-  }
 
   // Infinitiv
   let infinitiv = word;
@@ -141,7 +136,7 @@ function parse(html, word) {
 
   let hilfsverb = 'haben';
 
-  // Tenses — use mp3 path on verbformen.DE domain
+  // Tenses — find table that comes right after the mp3 link
   const tenseConfig = [
     { key:'praesens',        mp3:'/konjugation/indikativ/praesens/' },
     { key:'praeteritum',     mp3:'/konjugation/indikativ/praeteritum/' },
@@ -153,7 +148,7 @@ function parse(html, word) {
 
   const tenses = {};
   for (const {key, mp3} of tenseConfig) {
-    const t = findLast(mp3);
+    const t = findTableAfterMp3(html, mp3);
     if (t) {
       const conj = parseConjTable(t);
       if (Object.keys(conj).length >= 3) {
@@ -173,7 +168,7 @@ function parse(html, word) {
   const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
 
   // Imperativ — last table with /konjugation/imperativ/
-  const impT = findLast('/konjugation/imperativ/');
+  const impT = findTableAfterMp3(html, '/konjugation/imperativ/');
   const IMP_SLOTS = ['du','ihr','Sie'];
   let imperativ = {};
   if (impT) {
