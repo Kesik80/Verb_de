@@ -404,6 +404,12 @@ async function lookup() {
       return;
     }
 
+    const tenseCount = Object.keys(data.tenses || {}).length;
+    if (tenseCount === 0) {
+      showError(`Глагол не найден или данных нет. Проверь написание.`);
+      return;
+    }
+
     render(data);
   } catch(e) {
     showError(`Ошибка сети: ${e.message}`);
@@ -414,8 +420,10 @@ async function lookup() {
 
 function setLoading(on) {
   loadingEl.classList.toggle('visible', on);
-  errorEl.classList.remove('visible');
-  resultEl.classList.remove('visible');
+  if (on) {
+    errorEl.classList.remove('visible');
+    resultEl.classList.remove('visible');
+  }
   searchBtn.disabled = on;
 }
 
@@ -515,6 +523,7 @@ function render(d) {
   `;
 
   resultEl.classList.add('visible');
+  console.log('render done, tenseCards length:', tenseCards.length, 'tenses:', Object.keys(d.tenses||{}));
 }
 </script>
 </body>
