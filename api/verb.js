@@ -23,27 +23,6 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
-  if (req.query.debug === '3') {
-    // Show 500 chars RAW before each table (not stripped)
-    const info = [];
-    let pos = 0;
-    let idx = 0;
-    while (true) {
-      const ts = html.indexOf('<table', pos);
-      if (ts === -1 || idx > 25) break;
-      const te = html.indexOf('</table>', ts);
-      if (te === -1) break;
-      // raw before — show links/hrefs
-      const rawBefore = html.slice(Math.max(0, ts - 500), ts).slice(-300);
-      // first row of table stripped
-      const firstRow = html.slice(ts, Math.min(ts+200, te)).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,100);
-      info.push({ idx, rawBefore, firstRow });
-      pos = te + 8;
-      idx++;
-    }
-    return res.status(200).json(info);
-  }
-
   try {
     return res.status(200).json(parse(html, verb));
   } catch (e) {
@@ -57,8 +36,9 @@ function strip(s) {
     .replace(/&middot;/g,'·').replace(/\s+/g,' ').trim();
 }
 
-// Find table preceded by a link whose href contains urlKey
-function findTableByMp3(html, mp3key) {
+// Collect all tables with their preceding raw HTML (300 chars)
+function getAllTables(html) {
+  const tables = [];
   let pos = 0;
   while (true) {
     const ts = html.indexOf('<table', pos);
@@ -66,10 +46,10 @@ function findTableByMp3(html, mp3key) {
     const te = html.indexOf('</table>', ts);
     if (te === -1) break;
     const before = html.slice(Math.max(0, ts - 300), ts);
-    if (before.includes(mp3key)) return html.slice(ts, te + 8);
+    tables.push({ before, html: html.slice(ts, te + 8) });
     pos = te + 8;
   }
-  return null;
+  return tables;
 }
 
 function rowCells(rowHtml) {
@@ -114,60 +94,54 @@ function parseConjTable(tableHtml) {
 }
 
 function parse(html, word) {
+  const tables = getAllTables(html);
+
+  // MP3 links go to verbformen.DE — find tables by mp3 path
+  // Take LAST match for each key (full section comes after compact section)
+  function findLast(mp3path) {
+    let found = null;
+    for (const t of tables) {
+      if (t.before.includes(mp3path)) found = t.html;
+    }
+    return found;
+  }
+
   // Infinitiv
   let infinitiv = word;
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung — Russian meaning, take longest vMng match
+  // Bedeutung
   let bedeutung = '';
   const bAll = [...html.matchAll(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,600}?)<\/[a-z]/g)];
   for (const m of bAll) {
-    const t = strip(m[1]).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
-    if (t.length > bedeutung.length) bedeutung = t;
+    const t = strip(m[1]).replace(/^\W+/, '').trim();
+    if (t.length > bedeutung.length && /[а-яёА-ЯЁ]/.test(t)) bedeutung = t;
   }
-  // Trim to first sentence or 80 chars
-  bedeutung = bedeutung.replace(/\s*».*$/, '').trim().slice(0, 100);
+  bedeutung = bedeutung.slice(0, 100).replace(/\s*».*$/, '').trim();
 
-  // Level A1/B2 etc — from the "A1 · неправильный · sein" rInf
-  let niveau = '';
-  const nivM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
-  if (nivM) niveau = nivM[1];
-
-  // Unregelmäßig
+  // Niveau, unregelmaessig
+  const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
+  const niveau = niveauM ? niveauM[1] : '';
   const unregelmaessig = /неправильн/i.test(html);
 
-  // Hilfsverb — detect from page text
   let hilfsverb = 'haben';
 
-  // Tense tables — identified by MP3 link URL before each table
-  // From debug tails: "ive/sein.mp3", "ein.mp3" etc — need the path segment
-  // MP3 URLs follow pattern: /konjugation/indikativ/praesens/sein.mp3
+  // Tenses — use mp3 path on verbformen.DE domain
   const tenseConfig = [
-    { key:'praesens',        mp3:'/indikativ/praesens/' },
-    { key:'praeteritum',     mp3:'/indikativ/praeteritum/' },
-    { key:'perfekt',         mp3:'/indikativ/perfekt/' },
-    { key:'plusquamperfekt', mp3:'/indikativ/plusquamperfekt/' },
-    { key:'futur1',          mp3:'/indikativ/futur1/' },
-    { key:'konjunktiv2',     mp3:'/konjunktiv/praeteritum/' },
+    { key:'praesens',        mp3:'/konjugation/indikativ/praesens/' },
+    { key:'praeteritum',     mp3:'/konjugation/indikativ/praeteritum/' },
+    { key:'perfekt',         mp3:'/konjugation/indikativ/perfekt/' },
+    { key:'plusquamperfekt', mp3:'/konjugation/indikativ/plusquamperfekt/' },
+    { key:'futur1',          mp3:'/konjugation/indikativ/futur1/' },
+    { key:'konjunktiv2',     mp3:'/konjugation/konjunktiv/praeteritum/' },
   ];
 
   const tenses = {};
   for (const {key, mp3} of tenseConfig) {
-    // Find ALL tables preceded by this mp3 key, take the LAST one (full section)
-    let found = null;
-    let pos = 0;
-    while (true) {
-      const ts = html.indexOf('<table', pos);
-      if (ts === -1) break;
-      const te = html.indexOf('</table>', ts);
-      if (te === -1) break;
-      const before = html.slice(Math.max(0, ts - 300), ts);
-      if (before.includes(mp3)) found = html.slice(ts, te + 8);
-      pos = te + 8;
-    }
-    if (found) {
-      const conj = parseConjTable(found);
+    const t = findLast(mp3);
+    if (t) {
+      const conj = parseConjTable(t);
       if (Object.keys(conj).length >= 3) {
         tenses[key] = conj;
         if (key==='perfekt' && conj['ich']) {
@@ -177,50 +151,36 @@ function parse(html, word) {
     }
   }
 
-  // Hauptformen: build "ist · war · ist gewesen" from tenses
-  const p3 = tenses.praesens?.['er/sie/es'] || '';
+  // Hauptformen + rInfStr
+  const p3  = tenses.praesens?.['er/sie/es'] || '';
   const pt3 = tenses.praeteritum?.['er/sie/es'] || '';
   const pf3 = tenses.perfekt?.['er/sie/es'] || '';
-  const hauptformen = {
-    praesens_3sg: p3,
-    praeteritum_3sg: pt3,
-    partizip2: pf3,
-  };
+  const hauptformen = { praesens_3sg: p3, praeteritum_3sg: pt3, partizip2: pf3 };
   const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
 
-  // Imperativ — last table before /imperativ/ mp3
+  // Imperativ — last table with /konjugation/imperativ/
+  const impT = findLast('/konjugation/imperativ/');
   const IMP_SLOTS = ['du','ihr','Sie'];
   let imperativ = {};
-  let impFound = null;
-  let pos2 = 0;
-  while (true) {
-    const ts = html.indexOf('<table', pos2);
-    if (ts === -1) break;
-    const te = html.indexOf('</table>', ts);
-    if (te === -1) break;
-    const before = html.slice(Math.max(0, ts - 300), ts);
-    if (before.includes('/imperativ/')) impFound = html.slice(ts, te + 8);
-    pos2 = te + 8;
-  }
-  if (impFound) {
+  if (impT) {
     const dataRows = [];
     let pos = 0;
     while (true) {
-      const rs = impFound.indexOf('<tr', pos);
+      const rs = impT.indexOf('<tr', pos);
       if (rs===-1) break;
-      const re = impFound.indexOf('</tr>', rs);
+      const re = impT.indexOf('</tr>', rs);
       if (re===-1) break;
-      const cells = rowCells(impFound.slice(rs,re));
+      const cells = rowCells(impT.slice(rs,re));
       pos = re+5;
       if (cells.length===2) dataRows.push(cells);
     }
-    // 4 rows: du, wir, ihr, Sie — we want du(0), ihr(2), Sie(3)
+    // rows: du(0), wir(1), ihr(2), Sie(3)
     if (dataRows[0]) imperativ['du']  = dataRows[0][1];
     if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
     if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
   }
 
-  // Beispiele — find example sentences
+  // Beispiele
   const beispiele = [];
   const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,300}?)<\//g;
   let bm;
