@@ -36,22 +36,21 @@ function strip(s) {
     .replace(/\s+/g,' ').trim();
 }
 
-// Find the Nth table after a text marker (Russian heading before table)
-// occurrence: which occurrence to use (0 = first, 1 = second, ...)
-function findTableAfter(html, marker, occurrence = 0) {
+// Get all tables with stripped text before them (400 chars) and their content
+function getAllTables(html) {
+  const tables = [];
   let pos = 0;
-  let found = 0;
   while (true) {
-    const idx = html.indexOf(marker, pos);
-    if (idx === -1) return null;
-    const ts = html.indexOf('<table', idx);
-    if (ts === -1 || ts - idx > 500) { pos = idx + 1; continue; }
+    const ts = html.indexOf('<table', pos);
+    if (ts === -1) break;
     const te = html.indexOf('</table>', ts);
-    if (te === -1) return null;
-    if (found === occurrence) return html.slice(ts, te + 8);
-    found++;
+    if (te === -1) break;
+    const before = html.slice(Math.max(0, ts - 400), ts)
+      .replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    tables.push({ before, html: html.slice(ts, te + 8) });
     pos = te + 8;
   }
+  return tables;
 }
 
 function rowCells(rowHtml) {
@@ -95,10 +94,25 @@ function parseConjTable(tableHtml) {
   return result;
 }
 
-// The page has two sections: compact summary (top) and full conjugation (bottom)
-// We want the FULL section tables — they appear SECOND for präsens/präteritum
-// For Perfekt/Plusquam/Futur they only appear once in full section
 function parse(html, word) {
+  const tables = getAllTables(html);
+
+  // Helper: find table whose "before" text ends with one of the markers
+  function findByMarker(markers, occurrence = 0) {
+    let count = 0;
+    for (const t of tables) {
+      const tail = t.before.slice(-80); // last 80 chars of context
+      for (const m of markers) {
+        if (tail.includes(m)) {
+          if (count === occurrence) return t.html;
+          count++;
+          break;
+        }
+      }
+    }
+    return null;
+  }
+
   // Infinitiv
   let infinitiv = word;
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
@@ -111,29 +125,30 @@ function parse(html, word) {
 
   let hilfsverb = 'haben';
 
-  // Map: tense key → [Russian marker, occurrence index]
-  // From debug: full-section tables appear after these Russian texts
-  // Präsens appears twice (compact + full) → use occurrence 1 (second)
-  // Präteritum appears twice → use occurrence 1
-  // Perfekt appears once in full section
+  // Tense config: markers that appear right before the table in "before" text
+  // From debug: "Презенс", "Претеритум", "Перфект", "Плюсквам.", "Футурум I", "Конъюнктив II"
+  // Präsens and Präteritum appear twice (compact + full) → use occurrence 1
+  // Konj II appears twice → use occurrence 1
+  // Others appear once in the full section
   const tenseConfig = [
-    { key:'praesens',        marker:'Презенс',    occ:1 },
-    { key:'praeteritum',     marker:'Претеритум', occ:1 },
-    { key:'perfekt',         marker:'Перфект',    occ:0 },
-    { key:'plusquamperfekt', marker:'Плюсквам.',  occ:0 },
-    { key:'futur1',          marker:'Футурум I',  occ:0 },
-    { key:'konjunktiv2',     marker:'Конъюнктив II', occ:1 },
+    { key:'praesens',        markers:['Презенс'],       occ:1 },
+    { key:'praeteritum',     markers:['Претеритум'],    occ:1 },
+    { key:'perfekt',         markers:['Перфект'],       occ:0 },
+    { key:'plusquamperfekt', markers:['Плюсквам'],      occ:0 },
+    { key:'futur1',          markers:['Футурум I'],     occ:0 },
+    { key:'konjunktiv2',     markers:['Конъюнктив II'], occ:1 },
   ];
 
   const tenses = {};
-  for (const {key, marker, occ} of tenseConfig) {
-    const t = findTableAfter(html, marker, occ);
+  for (const {key, markers, occ} of tenseConfig) {
+    const t = findByMarker(markers, occ);
     if (t) {
       const conj = parseConjTable(t);
       if (Object.keys(conj).length >= 3) {
         tenses[key] = conj;
-        if (key==='perfekt' && conj['ich'] && /^bin\b/i.test(conj['ich']))
-          hilfsverb = 'sein';
+        if (key==='perfekt' && conj['ich'] && /^(habe|bin)\b/i.test(conj['ich'])) {
+          hilfsverb = /^bin\b/i.test(conj['ich']) ? 'sein' : 'haben';
+        }
       }
     }
   }
@@ -142,35 +157,36 @@ function parse(html, word) {
   const hauptformen = {
     praesens_3sg:    tenses.praesens?.['er/sie/es'] || '',
     praeteritum_3sg: tenses.praeteritum?.['er/sie/es'] || '',
-    partizip2:       '',
+    partizip2: '',
   };
   if (tenses.perfekt?.['er/sie/es']) {
-    const pf = tenses.perfekt['er/sie/es'].trim().split(/\s+/);
-    hauptformen.partizip2 = pf[pf.length-1];
+    const parts = tenses.perfekt['er/sie/es'].trim().split(/\s+/);
+    hauptformen.partizip2 = parts[parts.length - 1];
   }
 
-  // Imperativ — after "Императив" marker, occurrence 0
-  const IMP_SLOTS = ['du','ihr','Sie'];
+  // Imperativ — marker "Императив", occurrence 0
+  // Row structure from debug: "- sei (du)", "wir seien", "(ihr) seid", "seien Sie"
+  // Cells[0] is pronoun hint, cells[1] is form
+  // But for machen: "mach (du)", "machen wir", "macht (ihr)", "machen Sie"
+  // We need: du→cells[1] of row0, ihr→cells[1] of row2, Sie→cells[1] of row3
   let imperativ = {};
-  const impT = findTableAfter(html, 'Императив', 0);
-  if (impT) {
+  const impTable = findByMarker(['Императив'], 0);
+  if (impTable) {
     const dataRows = [];
     let pos = 0;
     while (true) {
-      const rs = impT.indexOf('<tr', pos);
+      const rs = impTable.indexOf('<tr', pos);
       if (rs===-1) break;
-      const re = impT.indexOf('</tr>', rs);
+      const re = impTable.indexOf('</tr>', rs);
       if (re===-1) break;
-      const cells = rowCells(impT.slice(rs,re));
+      const cells = rowCells(impTable.slice(rs,re));
       pos = re+5;
-      if (cells.length===2 && cells[0].length<=15) dataRows.push(cells);
+      if (cells.length===2) dataRows.push(cells);
     }
-    // Imperativ rows: "(du) sei", "wir seien", "(ihr) seid", "seien Sie"
-    // Just take forms from col[1], assign to du/ihr/Sie by position
-    const forms = dataRows.map(r => r[1]).filter(Boolean);
-    if (forms[0]) imperativ['du']  = forms[0];
-    if (forms[2]) imperativ['ihr'] = forms[2];
-    if (forms[3]) imperativ['Sie'] = forms[3];
+    // 4 rows: du, wir, ihr, Sie
+    if (dataRows[0]) imperativ['du']  = dataRows[0][1];
+    if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
+    if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
   }
 
   // Beispiele
