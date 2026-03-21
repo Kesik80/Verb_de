@@ -396,7 +396,7 @@ async function lookup() {
   setLoading(true);
 
   try {
-    const res = await fetch(`/api/verb?w=${encodeURIComponent(verb)}`);
+    const res = await fetch(`/api/v2?w=${encodeURIComponent(verb)}`);
     const data = await res.json();
 
     if (!res.ok || data.error) {
