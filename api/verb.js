@@ -198,6 +198,9 @@ function parse(html, word) {
     if (t.length>5 && !beispiele.includes(t)) beispiele.push(t);
   }
 
-  return { infinitiv, hauptformen, bedeutung, hilfsverb, tenses, imperativ, beispiele,
+  // unregelmäßig — page contains the word
+  const unregelmaessig = /unregelmäßig|неправильн/i.test(html);
+
+  return { infinitiv, hauptformen, bedeutung, hilfsverb, unregelmaessig, tenses, imperativ, beispiele,
     source:`https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm` };
 }
