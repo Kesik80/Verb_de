@@ -119,9 +119,19 @@ function parse(html, word) {
   if (infM) infinitiv = infM[1].trim();
 
   // Hauptformen from rInf: "ist · war · ist gewesen"
+  // There are multiple rInf elements — find the one with verb forms (contains ·)
+  // The correct one has German verb forms, not level info like "A1 · неправильный"
   let rInfStr = '';
-  const rInfM = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,600}?)<\/p>/);
-  if (rInfM) rInfStr = strip(rInfM[1]);
+  const rInfAll = [...html.matchAll(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,600}?)<\/p>/g)];
+  for (const m of rInfAll) {
+    const s = strip(m[1]);
+    const parts = s.split('·').map(p => p.trim()).filter(Boolean);
+    // Valid rInf has 3 parts that look like German verb forms (contain lowercase German letters)
+    if (parts.length >= 3 && /^[a-zäöüß]/.test(parts[0])) {
+      rInfStr = s;
+      break;
+    }
+  }
 
   // Bedeutung — full Russian meaning from vMng
   let bedeutung = '';
