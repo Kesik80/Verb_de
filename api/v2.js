@@ -100,8 +100,14 @@ function parseConjTable(tableHtml) {
     if (re===-1) break;
     const cells = rowCells(tableHtml.slice(rs,re));
     pos = re + 5;
-    if (cells.length===2 && cells[0].length>0 && cells[1].length>0)
-      dataRows.push(cells);
+    if (cells.length >= 2 && cells[0].length > 0) {
+      // 2 cols: [pronoun, form]
+      // 3 cols: [pronoun, hilfsverb, partizip] → join cols 1+2
+      const form = cells.length >= 3
+        ? (cells[1] + ' ' + cells[2]).trim()
+        : cells[1];
+      dataRows.push([cells[0], form]);
+    }
   }
   dataRows.slice(0,6).forEach((cells,i) => {
     result[SLOT_KEYS[i]] = cells[1];
