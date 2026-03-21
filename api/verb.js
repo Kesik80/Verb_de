@@ -118,10 +118,15 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung
+  // Hauptformen from rInf: "ist · war · ist gewesen"
+  let rInfStr = '';
+  const rInfM = html.match(/class="[^"]*rInf[^"]*"[^>]*>([\s\S]{1,600}?)<\/p>/);
+  if (rInfM) rInfStr = strip(rInfM[1]);
+
+  // Bedeutung — full Russian meaning from vMng
   let bedeutung = '';
-  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,400}?)<\//);
-  if (bM) bedeutung = strip(bM[1]);
+  const bM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,600}?)<\/[a-z]/);
+  if (bM) bedeutung = strip(bM[1]).replace(/^🇷🇺\s*/, '').replace(/^[^а-яёА-ЯЁa-z]+/, '').trim();
 
   let hilfsverb = 'haben';
 
@@ -153,16 +158,14 @@ function parse(html, word) {
     }
   }
 
-  // Hauptformen from tenses
+  // Hauptformen — parse rInf "ist · war · ist gewesen"
+  // Split by · and clean
+  const rInfParts = rInfStr.split('·').map(s => s.trim()).filter(Boolean);
   const hauptformen = {
-    praesens_3sg:    tenses.praesens?.['er/sie/es'] || '',
-    praeteritum_3sg: tenses.praeteritum?.['er/sie/es'] || '',
-    partizip2: '',
+    praesens_3sg:    rInfParts[0] || tenses.praesens?.['er/sie/es'] || '',
+    praeteritum_3sg: rInfParts[1] || tenses.praeteritum?.['er/sie/es'] || '',
+    partizip2:       rInfParts[2] || '',
   };
-  if (tenses.perfekt?.['er/sie/es']) {
-    const parts = tenses.perfekt['er/sie/es'].trim().split(/\s+/);
-    hauptformen.partizip2 = parts[parts.length - 1];
-  }
 
   // Imperativ — marker "Императив", occurrence 0
   // Row structure from debug: "- sei (du)", "wir seien", "(ihr) seid", "seien Sie"
@@ -198,9 +201,11 @@ function parse(html, word) {
     if (t.length>5 && !beispiele.includes(t)) beispiele.push(t);
   }
 
-  // unregelmäßig — page contains the word
+  // Level (A1, A2, B1...) and unregelmäßig
+  const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
+  const niveau = niveauM ? niveauM[1] : '';
   const unregelmaessig = /unregelmäßig|неправильн/i.test(html);
 
-  return { infinitiv, hauptformen, bedeutung, hilfsverb, unregelmaessig, tenses, imperativ, beispiele,
+  return { infinitiv, rInfStr, hauptformen, bedeutung, niveau, hilfsverb, unregelmaessig, tenses, imperativ, beispiele,
     source:`https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm` };
 }
