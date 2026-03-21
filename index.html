@@ -385,13 +385,13 @@
   td.main-pronoun {
     padding: 10px 10px;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 13px;
     white-space: nowrap;
   }
 
   td.main-form {
     padding: 10px 10px;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--text);
     word-break: break-word;
@@ -522,9 +522,9 @@ function render(d) {
 
   // Main table: Pronomen | Präsens | Präteritum | Perfekt
   const mainTenses = [
-    { key: 'praesens',    name: 'Präsens' },
-    { key: 'praeteritum', name: 'Präteritum' },
-    { key: 'perfekt',     name: 'Perfekt' },
+    { key: 'praesens',    name: 'Präs.' },
+    { key: 'praeteritum', name: 'Prät.' },
+    { key: 'perfekt',     name: 'Perf.' },
   ];
   const mainRows = PRONOUNS.map(p => {
     const cells = mainTenses.map(t => {
