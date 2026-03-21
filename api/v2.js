@@ -59,7 +59,7 @@ function getAllTables(html) {
     if (ts === -1) break;
     const te = html.indexOf('</table>', ts);
     if (te === -1) break;
-    const before = html.slice(Math.max(0, ts - 300), ts);
+    const before = html.slice(Math.max(0, ts - 800), ts);
     tables.push({ before, html: html.slice(ts, te + 8) });
     pos = te + 8;
   }
