@@ -23,17 +23,6 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
-  if (req.query.debug === '4') {
-    // Show raw HTML of perfekt table
-    const mp3key = '/konjugation/indikativ/perfekt/';
-    const mp3pos = html.indexOf(mp3key);
-    if (mp3pos === -1) return res.status(200).json({ error: 'mp3 not found' });
-    const ts = html.indexOf('<table', mp3pos);
-    const te = html.indexOf('</table>', ts);
-    const rawTable = ts === -1 ? 'no table' : html.slice(ts, te + 8);
-    return res.status(200).json({ dist: ts - mp3pos, rawTable });
-  }
-
   try {
     return res.status(200).json(parse(html, verb));
   } catch (e) {
@@ -47,61 +36,53 @@ function strip(s) {
     .replace(/&middot;/g,'·').replace(/\s+/g,' ').trim();
 }
 
-// Find the LAST table that appears after mp3key in html
-// Strategy: find mp3 link position, then find next <table> after it
+function formatCell(h) {
+  return h
+    .replace(/<b><u>(.*?)<\/u><\/b>/g,'<span class="vf-stress">$1</span>')
+    .replace(/<b><i><u>(.*?)<\/u><\/i><\/b>/g,'<span class="vf-stress">$1</span>')
+    .replace(/<u>(.*?)<\/u>/g,'<span class="vf-stress">$1</span>')
+    .replace(/<b>(.*?)<\/b>/g,'<span class="vf-bold">$1</span>')
+    .replace(/<i>(.*?)<\/i>/g,'<span class="vf-it">$1</span>')
+    .replace(/<[^>]+>/g,'')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&shy;/g,'')
+    .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
+    .trim();
+}
+
 function findTableAfterMp3(html, mp3key) {
   let result = null;
   let pos = 0;
   while (true) {
     const mp3pos = html.indexOf(mp3key, pos);
     if (mp3pos === -1) break;
-    // Find next <table> after this mp3 link
     const ts = html.indexOf('<table', mp3pos);
-    if (ts === -1) { pos = mp3pos + 1; continue; }
-    // Make sure table is within 500 chars of mp3 link
-    if (ts - mp3pos > 500) { pos = mp3pos + 1; continue; }
-    const te = html.indexOf('</table>', ts);
-    if (te === -1) break;
-    result = html.slice(ts, te + 8);
+    if (ts !== -1 && ts - mp3pos <= 500) {
+      const te = html.indexOf('</table>', ts);
+      if (te !== -1) result = html.slice(ts, te + 8);
+    }
     pos = mp3pos + 1;
   }
-  return result; // returns LAST match
+  return result;
 }
 
-function rowCells(rowHtml) {
-  const cells = [];
-  let cp = 0;
+function findMp3(html, segment) {
+  let result = null;
+  let pos = 0;
   while (true) {
-    const td = rowHtml.indexOf('<td', cp);
-    const th = rowHtml.indexOf('<th', cp);
-    let cs = -1, ct = '';
-    if (td===-1 && th===-1) break;
-    if (td===-1){cs=th;ct='</th>';}
-    else if(th===-1){cs=td;ct='</td>';}
-    else{cs=Math.min(td,th);ct=cs===td?'</td>':'</th>';}
-    const ce = rowHtml.indexOf(ct, cs);
-    if (ce===-1) break;
-    cells.push(strip(rowHtml.slice(cs,ce)));
-    cp = ce + ct.length;
+    const idx = html.indexOf(segment, pos);
+    if (idx === -1) break;
+    const hrefStart = html.lastIndexOf('href="', idx);
+    if (hrefStart !== -1 && idx - hrefStart < 200) {
+      const urlEnd = html.indexOf('"', hrefStart + 6);
+      const url = html.slice(hrefStart + 6, urlEnd);
+      if (url.endsWith('.mp3')) result = url;
+    }
+    pos = idx + 1;
   }
-  return cells;
+  return result;
 }
 
 const SLOT_KEYS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
-
-// Convert verbformen HTML markup to our span-based format
-function formatCell(html) {
-  return html
-    .replace(/<b><u>(.*?)<\/u><\/b>/g, '<span class="vf-stress">$1</span>')
-    .replace(/<b><i><u>(.*?)<\/u><\/i><\/b>/g, '<span class="vf-stress">$1</span>')
-    .replace(/<u>(.*?)<\/u>/g, '<span class="vf-stress">$1</span>')
-    .replace(/<b>(.*?)<\/b>/g, '<span class="vf-bold">$1</span>')
-    .replace(/<i>(.*?)<\/i>/g, '<span class="vf-it">$1</span>')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&shy;/g,'')
-    .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-    .trim();
-}
 
 function parseConjTable(tableHtml) {
   const result = {};
@@ -109,13 +90,11 @@ function parseConjTable(tableHtml) {
   let pos = 0;
   while (true) {
     const rs = tableHtml.indexOf('<tr', pos);
-    if (rs===-1) break;
+    if (rs === -1) break;
     const re = tableHtml.indexOf('</tr>', rs);
-    if (re===-1) break;
-    // Get raw cell HTML (not stripped)
+    if (re === -1) break;
     const rowHtml = tableHtml.slice(rs, re);
     pos = re + 5;
-    // Extract raw td content
     const rawCells = [];
     let cp = 0;
     while (true) {
@@ -123,7 +102,6 @@ function parseConjTable(tableHtml) {
       if (td === -1) break;
       const tde = rowHtml.indexOf('</td>', td);
       if (tde === -1) break;
-      // Get inner html of td
       const gtEnd = rowHtml.indexOf('>', td);
       rawCells.push(rowHtml.slice(gtEnd + 1, tde));
       cp = tde + 5;
@@ -137,44 +115,40 @@ function parseConjTable(tableHtml) {
       dataRows.push([pronoun, form.trim()]);
     }
   }
-  dataRows.slice(0,6).forEach((cells,i) => {
-    result[SLOT_KEYS[i]] = cells[1];
-  });
+  dataRows.slice(0,6).forEach((cells,i) => { result[SLOT_KEYS[i]] = cells[1]; });
   return result;
 }
 
 function parse(html, word) {
-
-
   // Infinitiv
   let infinitiv = word;
-  const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
+  const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung
+  // Bedeutung — extract Cyrillic translation list
   let bedeutung = '';
-  const bAll = [...html.matchAll(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,600}?)<\/[a-z]/g)];
-  for (const m of bAll) {
-    const t = strip(m[1]).replace(/^\W+/, '').trim();
-    if (t.length > bedeutung.length && /[а-яёА-ЯЁ]/.test(t)) bedeutung = t;
-  }
-  bedeutung = bedeutung.slice(0, 100).replace(/\s*».*$/, '').trim();
+  const cyrM = html.match(/[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,25}(?:,\s*[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,25}){1,6}/);
+  if (cyrM) bedeutung = cyrM[0].slice(0, 120).trim();
 
-  // Niveau, unregelmaessig
+  // Niveau
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   const niveau = niveauM ? niveauM[1] : '';
-  const unregelmaessig = /неправильн/i.test(html);
+
+  // Verb type
+  const unregelmaessig = /\u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html);
+  const regelmaessig = /\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html) && !unregelmaessig;
+  const verbType = unregelmaessig ? 'unregelm\xe4\xdfig' : (regelmaessig ? 'regelm\xe4\xdfig' : '');
 
   let hilfsverb = 'haben';
 
-  // Tenses — find table that comes right after the mp3 link
+  // Tenses
   const tenseConfig = [
-    { key:'praesens',        mp3:'/konjugation/indikativ/praesens/' },
-    { key:'praeteritum',     mp3:'/konjugation/indikativ/praeteritum/' },
-    { key:'perfekt',         mp3:'/konjugation/indikativ/perfekt/' },
-    { key:'plusquamperfekt', mp3:'/konjugation/indikativ/plusquamperfekt/' },
-    { key:'futur1',          mp3:'/konjugation/indikativ/futur1/' },
-    { key:'konjunktiv2',     mp3:'/konjugation/konjunktiv/praeteritum/' },
+    { key:'praesens',        mp3:'indikativ/praesens/' },
+    { key:'praeteritum',     mp3:'indikativ/praeteritum/' },
+    { key:'perfekt',         mp3:'indikativ/perfekt/' },
+    { key:'plusquamperfekt', mp3:'indikativ/plusquamperfekt/' },
+    { key:'futur1',          mp3:'indikativ/futur1/' },
+    { key:'konjunktiv2',     mp3:'konjunktiv/praeteritum/' },
   ];
 
   const tenses = {};
@@ -184,86 +158,77 @@ function parse(html, word) {
       const conj = parseConjTable(t);
       if (Object.keys(conj).length >= 3) {
         tenses[key] = conj;
-        if (key==='perfekt' && conj['ich']) {
-          hilfsverb = /^bin\b/i.test(conj['ich']) ? 'sein' : 'haben';
+        if (key === 'perfekt' && conj['ich']) {
+          hilfsverb = /^bin\b/i.test(strip(conj['ich'])) ? 'sein' : 'haben';
         }
       }
     }
   }
 
-  // Hauptformen + rInfStr
-  const p3  = tenses.praesens?.['er/sie/es'] || '';
-  const pt3 = tenses.praeteritum?.['er/sie/es'] || '';
-  const pf3 = tenses.perfekt?.['er/sie/es'] || '';
+  // Hauptformen
+  const p3  = strip(tenses.praesens?.['er/sie/es'] || '');
+  const pt3 = strip(tenses.praeteritum?.['er/sie/es'] || '');
+  const pf3 = strip(tenses.perfekt?.['er/sie/es'] || '');
+  const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' \xb7 ');
   const hauptformen = { praesens_3sg: p3, praeteritum_3sg: pt3, partizip2: pf3 };
-  const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
 
-  // Imperativ — last table with /konjugation/imperativ/
-  const impT = findTableAfterMp3(html, '/konjugation/imperativ/');
+  // Imperativ
   const IMP_SLOTS = ['du','ihr','Sie'];
   let imperativ = {};
+  const impT = findTableAfterMp3(html, '/imperativ/');
   if (impT) {
     const dataRows = [];
     let pos = 0;
     while (true) {
       const rs = impT.indexOf('<tr', pos);
-      if (rs===-1) break;
+      if (rs === -1) break;
       const re = impT.indexOf('</tr>', rs);
-      if (re===-1) break;
-      const cells = rowCells(impT.slice(rs,re));
-      pos = re+5;
-      if (cells.length===2) dataRows.push(cells);
+      if (re === -1) break;
+      const cells = [];
+      let cp = 0;
+      const rowHtml = impT.slice(rs, re);
+      while (true) {
+        const td = rowHtml.indexOf('<td', cp);
+        if (td === -1) break;
+        const tde = rowHtml.indexOf('</td>', td);
+        if (tde === -1) break;
+        cells.push(strip(rowHtml.slice(td, tde)));
+        cp = tde + 5;
+      }
+      if (cells.length === 2) dataRows.push(cells);
+      pos = re + 5;
     }
-    // rows: du(0), wir(1), ihr(2), Sie(3)
     if (dataRows[0]) imperativ['du']  = dataRows[0][1];
     if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
     if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
+  }
+
+  // MP3 URLs
+  const mp3s = {};
+  const mp3Segs = {
+    praesens:   'indikativ/praesens/',
+    praeteritum:'indikativ/praeteritum/',
+    perfekt:    'indikativ/perfekt/',
+    konjunktiv2:'konjunktiv/praeteritum/',
+    infinitiv:  'konjugation/infinitiv',
+  };
+  for (const [key, seg] of Object.entries(mp3Segs)) {
+    const url = findMp3(html, seg);
+    if (url) mp3s[key] = url;
   }
 
   // Beispiele
   const beispiele = [];
   const bspRe = /class="[^"]*\bbsp\b[^"]*"[^>]*>([\s\S]{5,300}?)<\//g;
   let bm;
-  while ((bm=bspRe.exec(html))!==null && beispiele.length<3) {
+  while ((bm = bspRe.exec(html)) !== null && beispiele.length < 3) {
     const t = strip(bm[1]);
-    if (t.length>5 && !beispiele.includes(t)) beispiele.push(t);
+    if (t.length > 5 && !beispiele.includes(t)) beispiele.push(t);
   }
-
-  // Extract mp3 URLs for each tense
-  const mp3s = {};
-  const mp3Keys = {
-    praesens:        '/konjugation/indikativ/praesens/',
-    praeteritum:     '/konjugation/indikativ/praeteritum/',
-    perfekt:         '/konjugation/indikativ/perfekt/',
-    plusquamperfekt: '/konjugation/indikativ/plusquamperfekt/',
-    futur1:          '/konjugation/indikativ/futur1/',
-    konjunktiv2:     '/konjugation/konjunktiv/praeteritum/',
-  };
-  for (const [key, path] of Object.entries(mp3Keys)) {
-    // Find last occurrence of this path (full section)
-    let mp3url = null;
-    let pos = 0;
-    while (true) {
-      const idx = html.indexOf(path, pos);
-      if (idx === -1) break;
-      // Extract full URL: find href=" before idx
-      const hrefStart = html.lastIndexOf('href="', idx);
-      if (hrefStart !== -1 && idx - hrefStart < 10) {
-        const urlEnd = html.indexOf('"', hrefStart + 6);
-        mp3url = html.slice(hrefStart + 6, urlEnd);
-      }
-      pos = idx + 1;
-    }
-    if (mp3url) mp3s[key] = mp3url;
-  }
-
-  // Also get infinitiv mp3
-  const infMp3M = html.match(/href="(https:\/\/www\.verbformen\.de\/konjugation\/infinitiv[^"]+\.mp3)"/);
-  if (infMp3M) mp3s.infinitiv = infMp3M[1];
 
   return {
     infinitiv, rInfStr, hauptformen, bedeutung,
-    niveau, hilfsverb, unregelmaessig,
+    niveau, verbType, hilfsverb, unregelmaessig,
     tenses, imperativ, beispiele, mp3s,
     source: `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm`
   };
