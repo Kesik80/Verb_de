@@ -89,6 +89,20 @@ function rowCells(rowHtml) {
 
 const SLOT_KEYS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
 
+// Convert verbformen HTML markup to our span-based format
+function formatCell(html) {
+  return html
+    .replace(/<b><u>(.*?)<\/u><\/b>/g, '<span class="vf-stress">$1</span>')
+    .replace(/<b><i><u>(.*?)<\/u><\/i><\/b>/g, '<span class="vf-stress">$1</span>')
+    .replace(/<u>(.*?)<\/u>/g, '<span class="vf-stress">$1</span>')
+    .replace(/<b>(.*?)<\/b>/g, '<span class="vf-bold">$1</span>')
+    .replace(/<i>(.*?)<\/i>/g, '<span class="vf-it">$1</span>')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&shy;/g,'')
+    .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
+    .trim();
+}
+
 function parseConjTable(tableHtml) {
   const result = {};
   const dataRows = [];
@@ -98,15 +112,29 @@ function parseConjTable(tableHtml) {
     if (rs===-1) break;
     const re = tableHtml.indexOf('</tr>', rs);
     if (re===-1) break;
-    const cells = rowCells(tableHtml.slice(rs,re));
+    // Get raw cell HTML (not stripped)
+    const rowHtml = tableHtml.slice(rs, re);
     pos = re + 5;
-    if (cells.length >= 2 && cells[0].length > 0) {
-      // 2 cols: [pronoun, form]
-      // 3 cols: [pronoun, hilfsverb, partizip] → join cols 1+2
-      const form = cells.length >= 3
-        ? (cells[1] + ' ' + cells[2]).trim()
-        : cells[1];
-      dataRows.push([cells[0], form]);
+    // Extract raw td content
+    const rawCells = [];
+    let cp = 0;
+    while (true) {
+      const td = rowHtml.indexOf('<td', cp);
+      if (td === -1) break;
+      const tde = rowHtml.indexOf('</td>', td);
+      if (tde === -1) break;
+      // Get inner html of td
+      const gtEnd = rowHtml.indexOf('>', td);
+      rawCells.push(rowHtml.slice(gtEnd + 1, tde));
+      cp = tde + 5;
+    }
+    if (rawCells.length >= 2) {
+      const pronoun = strip(rawCells[0]);
+      if (!pronoun) continue;
+      const form = rawCells.length >= 3
+        ? formatCell(rawCells[1]) + ' ' + formatCell(rawCells[2])
+        : formatCell(rawCells[1]);
+      dataRows.push([pronoun, form.trim()]);
     }
   }
   dataRows.slice(0,6).forEach((cells,i) => {
@@ -201,10 +229,42 @@ function parse(html, word) {
     if (t.length>5 && !beispiele.includes(t)) beispiele.push(t);
   }
 
+  // Extract mp3 URLs for each tense
+  const mp3s = {};
+  const mp3Keys = {
+    praesens:        '/konjugation/indikativ/praesens/',
+    praeteritum:     '/konjugation/indikativ/praeteritum/',
+    perfekt:         '/konjugation/indikativ/perfekt/',
+    plusquamperfekt: '/konjugation/indikativ/plusquamperfekt/',
+    futur1:          '/konjugation/indikativ/futur1/',
+    konjunktiv2:     '/konjugation/konjunktiv/praeteritum/',
+  };
+  for (const [key, path] of Object.entries(mp3Keys)) {
+    // Find last occurrence of this path (full section)
+    let mp3url = null;
+    let pos = 0;
+    while (true) {
+      const idx = html.indexOf(path, pos);
+      if (idx === -1) break;
+      // Extract full URL: find href=" before idx
+      const hrefStart = html.lastIndexOf('href="', idx);
+      if (hrefStart !== -1 && idx - hrefStart < 10) {
+        const urlEnd = html.indexOf('"', hrefStart + 6);
+        mp3url = html.slice(hrefStart + 6, urlEnd);
+      }
+      pos = idx + 1;
+    }
+    if (mp3url) mp3s[key] = mp3url;
+  }
+
+  // Also get infinitiv mp3
+  const infMp3M = html.match(/href="(https:\/\/www\.verbformen\.de\/konjugation\/infinitiv[^"]+\.mp3)"/);
+  if (infMp3M) mp3s.infinitiv = infMp3M[1];
+
   return {
     infinitiv, rInfStr, hauptformen, bedeutung,
     niveau, hilfsverb, unregelmaessig,
-    tenses, imperativ, beispiele,
+    tenses, imperativ, beispiele, mp3s,
     source: `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm`
   };
 }
