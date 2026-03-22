@@ -23,6 +23,19 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
+  if (req.query.debug === 'tr') {
+    // Find all Cyrillic text blocks with context
+    const hits = [];
+    const re = /([\u0410-\u042f\u0430-\u044f\u0401\u0451].{10,80})/g;
+    let m;
+    while ((m = re.exec(html)) !== null && hits.length < 15) {
+      const ctx = html.slice(Math.max(0,m.index-80), m.index+100)
+        .replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+      hits.push(ctx);
+    }
+    return res.status(200).json(hits);
+  }
+
   try {
     return res.status(200).json(parse(html, verb));
   } catch (e) {
@@ -125,33 +138,15 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung — find Russian translation after flag image
+  // Bedeutung — find Russian translation
+  // verbformen.ru: translations are Russian verb infinitives like "иметь, обладать, владеть"
+  // Match: word ending in -ть/-чь/-ться followed by comma-separated similar words
   let bedeutung = '';
-  // verbformen.ru shows translations like: 🇷🇺 быть, являться...
-  // The flag is rendered as <img src="...ru.svg"> or similar
-  // Find the translation block by looking for flag then Cyrillic text on same line
-  const flagPatterns = ['/ru.svg', '/ru.png', 'flag-ru', 'russia'];
-  for (const pat of flagPatterns) {
-    const idx = html.indexOf(pat);
-    if (idx === -1) continue;
-    // Get text in next 300 chars after flag
-    const chunk = html.slice(idx, idx + 400);
-    const t = strip(chunk).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
-    // Must start with Cyrillic, avoid nav words
-    const navRe = /^(формы|примеры|переводы|значени|вывод|правил|спряж|английск|немецк)/i;
-    if (t.length > 5 && !navRe.test(t)) {
-      bedeutung = t.slice(0, 100).replace(/\s*[»\|].*/,'').trim();
-      break;
-    }
-  }
-  // Fallback: find text right before pronunciation line /zaɪn/
-  if (!bedeutung) {
-    const pronIdx = html.indexOf('/z') !== -1 ? html.indexOf('/z') : html.indexOf('/h');
-    if (pronIdx > 0) {
-      const before = html.slice(Math.max(0, pronIdx - 500), pronIdx);
-      const t = strip(before).replace(/^[\s\S]*?([\u0410-\u042f\u0430-\u044f\u0401\u0451].{5,100})$/, '$1');
-      if (/[\u0430-\u044f\u0451]/.test(t)) bedeutung = t.slice(0, 100).trim();
-    }
+  const transRe = /[а-яёА-ЯЁ]{3,}(?:ть|чь|ться)[а-яёА-ЯЁ ,\-]{5,100}/g;
+  const navWords = /форм|пример|перев|знач|правил|спряж/i;
+  for (const m of html.matchAll(transRe)) {
+    const t = m[0].trim().replace(/,\s*$/, '');
+    if (!navWords.test(t) && t.length > bedeutung.length) bedeutung = t.slice(0, 100);
   }
 
   // Niveau
