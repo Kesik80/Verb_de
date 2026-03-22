@@ -693,7 +693,7 @@ function render(d) {
   if (d.verbType) tags.push(d.verbType);
   if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
 
-  const rInfMp3 = d.mp3s?.perfekt || d.mp3s?.praesens || '';
+  const rInfMp3 = d.mp3s?.stammformen || d.mp3s?.perfekt || d.mp3s?.praesens || '';
   resultEl.innerHTML = `
     <div class="verb-header">
       <div class="verb-meta">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
@@ -808,9 +808,10 @@ async function saveVerb() {
       hilfsverb: currentVerb.hilfsverb || 'haben',
       bedeutung: meaning,
       mp3:       currentVerb.mp3s?.infinitiv || '',
+      stammformen_mp3: currentVerb.mp3s?.stammformen || '',
       hauptformen: {
         text: currentVerb.rInfStr || '',
-        mp3:  currentVerb.mp3s?.perfekt || ''
+        mp3:  currentVerb.mp3s?.stammformen || currentVerb.mp3s?.perfekt || ''
       },
       tabelle: {
         praesens:    currentVerb.tenses?.praesens    || {},
