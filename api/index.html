@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verbkonjugation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f18;
+    --surface: #13151f;
+    --surface2: #1a1d2e;
+    --border: #2a2d3e;
+    --accent: #4fc3f7;
+    --accent2: #7c4dff;
+    --text: #e8eaf6;
+    --muted: #6b7280;
+    --green: #6dbd8a;
+    --red: #e07878;
+    --yellow: #d4a855;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .source-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .search-wrap {
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .search-inner {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,195,247,0.12);
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  button {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 12px;
+    padding: 14px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  button:hover { opacity: 0.9; }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .examples {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
+  .chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .result {
+    width: 100%;
+    max-width: 900px;
+    display: none;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .result.visible { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .verb-header {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .verb-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .verb-forms {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .verb-forms .hf {
+    color: var(--yellow);
+  }
+
+  .verb-right {
+    text-align: right;
+  }
+
+  .verb-bedeutung {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(79,195,247,0.1);
+    border: 1px solid rgba(79,195,247,0.2);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 11px;
+    color: var(--accent);
+    margin: 2px 2px 0 0;
+  }
+
+  .tenses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .tense-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .tense-card:hover { border-color: var(--accent2); }
+
+  .tense-name {
+    background: var(--surface2);
+    padding: 12px 18px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tense-label { color: var(--accent); font-size: 10px; letter-spacing: 1px; }
+
+  .conj-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    padding: 8px 18px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    align-items: center;
+  }
+
+  .conj-row:last-child { border-bottom: none; }
+  .conj-row:hover { background: rgba(79,195,247,0.05); }
+
+  .pronoun { color: var(--muted); font-size: 13px; }
+  .form { font-size: 15px; font-weight: 500; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .info-card h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .imper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .imper-item { display: flex; flex-direction: column; gap: 3px; }
+  .imper-pron { font-size: 11px; color: var(--muted); }
+  .imper-form { font-size: 15px; font-weight: 500; }
+
+  .bsp-item {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .bsp-item:last-child { border-bottom: none; }
+
+  .source-link {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: -8px;
+  }
+
+  .source-link a { color: var(--accent); text-decoration: none; }
+  .source-link a:hover { text-decoration: underline; }
+
+  .loading { text-align: center; padding: 60px; color: var(--muted); display: none; }
+  .loading.visible { display: block; }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error {
+    background: rgba(224,120,120,0.1);
+    border: 1px solid rgba(224,120,120,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: var(--red);
+    display: none;
+    font-size: 13px;
+  }
+
+  .error.visible { display: block; }
+
+  .no-data { color: var(--muted); font-size: 13px; font-style: italic; }
+
+  .verb-meta { margin-bottom: 8px; }
+  .verb-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .speak-lg { font-size: 22px !important; }
+  .verb-bedeutung { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+  /* verbformen.ru markup */
+  .vf-stress { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .vf-it { font-style: italic; opacity: 0.85; }
+  .vf-bold { font-weight: 700; }
+
+  /* TTS button */
+  .speak-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.15s;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  .speak-btn:hover { color: var(--accent); }
+
+  .main-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .main-table thead tr {
+    background: var(--surface2);
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .main-table th {
+    padding: 10px 10px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-align: left;
+  }
+
+  .main-table th:first-child {
+    color: var(--muted);
+    width: 70px;
+  }
+
+  .main-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+
+  .main-table tbody tr:last-child { border-bottom: none; }
+  .main-table tbody tr:hover { background: rgba(79,195,247,0.05); }
+
+  td.main-pronoun {
+    padding: 10px 10px;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  td.main-form {
+    padding: 10px 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  td.main-form:nth-child(2) { color: var(--text); }
+  td.main-form:nth-child(3) { color: var(--yellow); }
+  td.main-form:nth-child(4) { color: var(--green); }
+
+  @media (max-width: 400px) {
+    td.main-pronoun { font-size: 10px; padding: 8px 6px; }
+    td.main-form { font-size: 12px; padding: 8px 6px; }
+    .main-table th { font-size: 8px; padding: 8px 6px; letter-spacing: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .verb-header { flex-direction: column; }
+    .verb-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Verbkonjugation</div>
+  <div class="subtitle">Deutsche Verben · Alle Zeiten</div>
+  <div class="source-badge">Quelle: verbformen.ru</div>
+</header>
+
+<div class="search-wrap">
+  <div class="search-inner">
+    <input type="text" id="verbInput" placeholder="Verb eingeben…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button id="searchBtn" onclick="lookup()">Suchen</button>
+  </div>
+  <div class="examples">
+    <div class="chip" onclick="quickSearch('sein')">sein</div>
+    <div class="chip" onclick="quickSearch('haben')">haben</div>
+    <div class="chip" onclick="quickSearch('gehen')">gehen</div>
+    <div class="chip" onclick="quickSearch('machen')">machen</div>
+    <div class="chip" onclick="quickSearch('kommen')">kommen</div>
+    <div class="chip" onclick="quickSearch('sprechen')">sprechen</div>
+    <div class="chip" onclick="quickSearch('werden')">werden</div>
+  </div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div>Daten werden geladen…</div>
+</div>
+
+<div class="error" id="error"></div>
+<div class="result" id="result"></div>
+
+<script>
+const verbInput = document.getElementById('verbInput');
+const searchBtn = document.getElementById('searchBtn');
+const loadingEl = document.getElementById('loading');
+const errorEl  = document.getElementById('error');
+const resultEl = document.getElementById('result');
+
+verbInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+
+function quickSearch(v) { verbInput.value = v; lookup(); }
+
+async function lookup() {
+  const verb = verbInput.value.trim().toLowerCase();
+  if (!verb) return;
+
+  setLoading(true);
+
+  try {
+    const res = await fetch(`/api/v2?w=${encodeURIComponent(verb)}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      showError(data.error || `Ошибка ${res.status}`);
+      return;
+    }
+
+    const tenseCount = Object.keys(data.tenses || {}).length;
+    if (tenseCount === 0) {
+      showError(`Глагол не найден или данных нет. Проверь написание.`);
+      return;
+    }
+
+    render(data);
+  } catch(e) {
+    showError(`Ошибка сети: ${e.message}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  loadingEl.classList.toggle('visible', on);
+  if (on) {
+    errorEl.classList.remove('visible');
+    resultEl.classList.remove('visible');
+  }
+  searchBtn.disabled = on;
+}
+
+function showError(msg) {
+  errorEl.textContent = msg;
+  errorEl.classList.add('visible');
+}
+
+const TENSES = [
+  { key: 'praesens',        name: 'Präsens',         label: 'Gegenwart' },
+  { key: 'praeteritum',     name: 'Präteritum',      label: 'Vergangenheit' },
+  { key: 'perfekt',         name: 'Perfekt',          label: 'Vollendete Geg.' },
+  { key: 'plusquamperfekt', name: 'Plusquamperfekt',  label: 'Vorvergangenheit' },
+  { key: 'futur1',          name: 'Futur I',           label: 'Zukunft' },
+  { key: 'konjunktiv2',     name: 'Konjunktiv II',    label: 'Irrealis' },
+];
+
+const PRONOUNS = ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'];
+
+function render(d) {
+  const hf = d.hauptformen || {};
+
+  // Use rInfStr directly if available: "ist · war · ist gewesen"
+  const hauptformenStr = d.rInfStr ||
+    [hf.praesens_3sg, hf.praeteritum_3sg, hf.partizip2]
+      .filter(Boolean)
+      .map(f => `<span class="hf">${f}</span>`)
+      .join(' · ');
+
+  // Main table: Pronomen | Präsens | Präteritum | Perfekt
+  const mainTenses = [
+    { key: 'praesens',    name: 'Präs.' },
+    { key: 'praeteritum', name: 'Prät.' },
+    { key: 'perfekt',     name: 'Perf.' },
+  ];
+  const mainRows = PRONOUNS.map(p => {
+    const cells = mainTenses.map(t => {
+      const form = d.tenses?.[t.key]?.[p] || '—';
+      const mp3 = d.mp3s?.[t.key] || '';
+      return `<td class="main-form"><span>${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</td>`;
+    }).join('');
+    return `<tr><td class="main-pronoun">${p}</td>${cells}</tr>`;
+  }).join('');
+  const mainTable = `
+    <div class="main-card">
+      <table class="main-table">
+        <thead>
+          <tr>
+            <th></th>
+            ${mainTenses.map(t => `<th>${t.name}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>${mainRows}</tbody>
+      </table>
+    </div>`;
+
+  // Secondary cards for remaining tenses
+  const secondaryTenses = TENSES.filter(t => t.key === 'konjunktiv2');
+  const tenseCards = secondaryTenses.map(t => {
+    const conj = d.tenses?.[t.key];
+    if (!conj || Object.keys(conj).length === 0) return '';
+    const rows = PRONOUNS.map(p => {
+      const form = conj[p] || '—';
+      const plainText = form.replace(/<[^>]+>/g,'');
+      const mp3 = d.mp3s?.konjunktiv2 || '';
+      return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</div>`;
+    }).join('');
+    return `
+      <div class="tense-card">
+        <div class="tense-name">
+          <span>${t.name}</span>
+          <span class="tense-label">${t.label}</span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  let imperativHtml = '';
+  let bspHtml = '';
+
+  const tags = [];
+  if (d.niveau) tags.push(d.niveau);
+  if (d.unregelmaessig) tags.push('unregelmäßig');
+  if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
+
+  const rInfMp3 = d.mp3s?.perfekt || d.mp3s?.praesens || '';
+  resultEl.innerHTML = `
+    <div class="verb-header">
+      <div class="verb-meta">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="verb-title-row">
+        <div class="verb-title">${d.infinitiv}</div>
+        ${d.mp3s?.infinitiv ? `<button class="speak-btn speak-lg" onclick="speak('${d.mp3s.infinitiv}')">🔊</button>` : ''}
+      </div>
+      ${hauptformenStr ? `<div class="verb-forms">${hauptformenStr}${rInfMp3 ? `<button class="speak-btn" onclick="speak('${rInfMp3}')">🔊</button>` : ''}</div>` : ''}
+      ${d.bedeutung ? `<div class="verb-bedeutung">🇷🇺 ${d.bedeutung}</div>` : ''}
+    </div>
+
+    ${mainTable}
+    ${tenseCards ? `<div class="tenses-grid">${tenseCards}</div>` : ''}
+
+    ${(imperativHtml || bspHtml) ? `<div class="info-grid">${imperativHtml}${bspHtml}</div>` : ''}
+
+    <div class="source-link">
+      Данные: <a href="${d.source}" target="_blank">verbformen.ru</a>
+    </div>
+  `;
+
+  resultEl.classList.add('visible');
+  console.log('render done, tenseCards length:', tenseCards.length, 'tenses:', Object.keys(d.tenses||{}));
+}
+
+let currentAudio = null;
+function speak(url) {
+  if (!url) return;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  currentAudio = new Audio(url);
+  currentAudio.play();
+}
+</script>
+</body>
+</html>
