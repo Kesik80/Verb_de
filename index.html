@@ -345,6 +345,54 @@
   .speak-lg { font-size: 22px !important; }
   .verb-bedeutung { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
+  /* Save button */
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(109,189,138,0.12);
+    border: 1px solid rgba(109,189,138,0.3);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+  .save-btn:hover { background: rgba(109,189,138,0.22); }
+  .save-btn.saved { color: var(--muted); border-color: var(--border); cursor: default; }
+  .save-btn.saving { opacity: 0.6; cursor: wait; }
+
+  /* Token input */
+  .token-wrap {
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 12px;
+  }
+  .token-inner {
+    display: flex;
+    gap: 8px;
+  }
+  .token-inner input {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  .token-save-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .token-save-btn:hover { border-color: var(--green); color: var(--green); }
+
   /* Autocomplete */
   .search-wrap { position: relative; }
 
@@ -483,6 +531,13 @@
   <div class="subtitle">Deutsche Verben · Alle Zeiten</div>
   <div class="source-badge">Quelle: verbformen.ru</div>
 </header>
+
+<div class="token-wrap">
+  <div class="token-inner">
+    <input type="password" id="ghToken" placeholder="GitHub Token (ghp_…)" autocomplete="off">
+    <button class="token-save-btn" onclick="saveToken()">💾</button>
+  </div>
+</div>
 
 <div class="search-wrap">
   <div class="search-inner">
@@ -655,34 +710,115 @@ function render(d) {
 
     ${(imperativHtml || bspHtml) ? `<div class="info-grid">${imperativHtml}${bspHtml}</div>` : ''}
 
-    <div class="source-link">
-      Данные: <a href="${d.source}" target="_blank">verbformen.ru</a>
+    <div class="source-link" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span>Данные: <a href="${d.source}" target="_blank">verbformen.ru</a></span>
+      <button class="save-btn" id="saveBtn" onclick="saveVerb()">＋ В словарь</button>
     </div>
   `;
 
+  currentVerb = d;
+  // Reset save button
+  const sb = document.getElementById('saveBtn');
+  if (sb) { sb.textContent = '＋ В словарь'; sb.classList.remove('saved','saving'); sb.disabled = false; }
   resultEl.classList.add('visible');
   console.log('render done, tenseCards length:', tenseCards.length, 'tenses:', Object.keys(d.tenses||{}));
 }
 
+// GitHub config
+const GH_OWNER = 'Kesik80';
+const GH_REPO  = 'verb-de';
+const GH_FILE  = 'verbs.js';
+
+function saveToken() {
+  const t = document.getElementById('ghToken').value.trim();
+  if (t) {
+    localStorage.setItem('gh_token', t);
+    document.getElementById('ghToken').style.borderColor = 'var(--green)';
+    setTimeout(() => document.getElementById('ghToken').style.borderColor = '', 1500);
+  }
+}
+
+// Load saved token
+window.addEventListener('DOMContentLoaded', () => {
+  const t = localStorage.getItem('gh_token');
+  if (t) document.getElementById('ghToken').value = t;
+});
+
+let currentVerb = null; // stores last rendered verb data
+
+async function saveVerb() {
+  const btn = document.getElementById('saveBtn');
+  if (!btn || !currentVerb) return;
+
+  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+  if (!token) { alert('Введи GitHub Token выше'); return; }
+
+  // Check if already in VERBS list
+  const v = currentVerb.infinitiv;
+  if (typeof VERBS !== 'undefined' && VERBS.some(([w]) => w === v)) {
+    btn.textContent = '✓ Уже в словаре';
+    btn.classList.add('saved');
+    return;
+  }
+
+  btn.textContent = '⏳ Сохраняю…';
+  btn.classList.add('saving');
+  btn.disabled = true;
+
+  try {
+    // 1. Get current file content + SHA
+    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    const fileData = await getRes.json();
+    const sha = fileData.sha;
+    const currentContent = atob(fileData.content.replace(/\n/g,''));
+
+    // 2. Build new entry
+    const meaning = currentVerb.bedeutung
+      ? currentVerb.bedeutung.split(',').slice(0,3).map(s=>s.trim()).join(', ')
+      : '—';
+    const newLine = `  ['${v}','${meaning}'],`;
+
+    // 3. Insert before closing ];
+    const insertAt = currentContent.lastIndexOf('];');
+    const newContent = currentContent.slice(0, insertAt) + newLine + '\n' + currentContent.slice(insertAt);
+
+    // 4. Push to GitHub
+    const putRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `add verb: ${v}`,
+        content: btoa(unescape(encodeURIComponent(newContent))),
+        sha
+      })
+    });
+
+    if (putRes.ok) {
+      // Add to local VERBS array too (for this session)
+      if (typeof VERBS !== 'undefined') VERBS.push([v, meaning]);
+      btn.textContent = '✓ Сохранено!';
+      btn.classList.remove('saving');
+      btn.classList.add('saved');
+    } else {
+      const err = await putRes.json();
+      throw new Error(err.message);
+    }
+  } catch(e) {
+    btn.textContent = '✗ Ошибка: ' + e.message.slice(0,30);
+    btn.classList.remove('saving');
+    btn.disabled = false;
+  }
+}
+
 let currentAudio = null;
 // Verb list with translations
-const VERBS = [
-  ['sein','быть'],['haben','иметь'],['werden','становиться'],['können','мочь'],
-  ['müssen','должен'],['sollen','следует'],['wollen','хотеть'],['dürfen','сметь'],
-  ['mögen','любить'],['gehen','идти'],['kommen','приходить'],['machen','делать'],
-  ['sagen','говорить'],['sehen','видеть'],['sprechen','говорить'],['geben','давать'],
-  ['nehmen','брать'],['finden','находить'],['lassen','оставлять'],['stehen','стоять'],
-  ['bleiben','оставаться'],['liegen','лежать'],['heißen','называться'],['denken','думать'],
-  ['wissen','знать'],['fragen','спрашивать'],['fahren','ехать'],['laufen','бежать'],
-  ['arbeiten','работать'],['wohnen','жить'],['kaufen','покупать'],['trinken','пить'],
-  ['essen','есть'],['schlafen','спать'],['lesen','читать'],['schreiben','писать'],
-  ['hören','слышать'],['sehen','видеть'],['spielen','играть'],['lernen','учиться'],
-  ['helfen','помогать'],['bringen','приносить'],['öffnen','открывать'],['schließen','закрывать'],
-  ['beginnen','начинать'],['enden','заканчивать'],['kennen','знать'],['verstehen','понимать'],
-  ['vergessen','забывать'],['erinnern','помнить'],['treffen','встречать'],['fliegen','летать'],
-  ['schwimmen','плавать'],['singen','петь'],['tanzen','танцевать'],['kochen','готовить'],
-  ['waschen','мыть'],['putzen','чистить'],['zeigen','показывать'],['erklären','объяснять'],
-];
+
 
 const acEl = document.getElementById('autocomplete');
 let acIndex = -1;
@@ -725,5 +861,6 @@ function speak(url) {
   currentAudio.play();
 }
 </script>
+<script src="/verbs.js"></script>
 </body>
 </html>
