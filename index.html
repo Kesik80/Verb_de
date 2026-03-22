@@ -748,13 +748,22 @@ let currentVerb = null; // stores last rendered verb data
 
 async function saveVerb() {
   const btn = document.getElementById('saveBtn');
-  if (!btn || !currentVerb) return;
+  if (!btn) return;
 
-  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
-  if (!token) { alert('Введи GitHub Token выше'); return; }
+  if (!currentVerb || !currentVerb.infinitiv) {
+    btn.textContent = '✗ Нет данных';
+    return;
+  }
 
-  // Check if already in VERBS list
+  const token = (localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim()).trim();
+  if (!token) {
+    alert('Введи GitHub Token в поле выше и нажми 💾');
+    return;
+  }
+
   const v = currentVerb.infinitiv;
+
+  // Check if already saved locally
   if (typeof VERBS !== 'undefined' && VERBS.some(([w]) => w === v)) {
     btn.textContent = '✓ Уже в словаре';
     btn.classList.add('saved');
@@ -766,51 +775,63 @@ async function saveVerb() {
   btn.disabled = true;
 
   try {
-    // 1. Get current file content + SHA
-    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
-      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
+    // 1. Get current verbs.js from GitHub
+    const getRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
+      { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' } }
+    );
+    if (!getRes.ok) {
+      const e = await getRes.json();
+      throw new Error(e.message || `GitHub ${getRes.status}`);
+    }
     const fileData = await getRes.json();
     const sha = fileData.sha;
-    const currentContent = atob(fileData.content.replace(/\n/g,''));
+    // Decode base64 — handle UTF-8
+    const bytes = Uint8Array.from(atob(fileData.content.replace(/\s/g,'')), c => c.charCodeAt(0));
+    const currentContent = new TextDecoder().decode(bytes);
 
-    // 2. Build new entry
+    // 2. Build new line
     const meaning = currentVerb.bedeutung
       ? currentVerb.bedeutung.split(',').slice(0,3).map(s=>s.trim()).join(', ')
-      : '—';
-    const newLine = `  ['${v}','${meaning}'],`;
+      : '';
+    const safe = meaning.replace(/'/g, "\'");
+    const newLine = `  ['${v}','${safe}'],\n`;
 
-    // 3. Insert before closing ];
+    // 3. Insert before last ];
     const insertAt = currentContent.lastIndexOf('];');
-    const newContent = currentContent.slice(0, insertAt) + newLine + '\n' + currentContent.slice(insertAt);
+    if (insertAt === -1) throw new Error('verbs.js format error');
+    const newContent = currentContent.slice(0, insertAt) + newLine + currentContent.slice(insertAt);
 
-    // 4. Push to GitHub
-    const putRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: `add verb: ${v}`,
-        content: btoa(unescape(encodeURIComponent(newContent))),
-        sha
-      })
-    });
+    // 4. Encode UTF-8 → base64
+    const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(newContent)));
 
-    if (putRes.ok) {
-      // Add to local VERBS array too (for this session)
-      if (typeof VERBS !== 'undefined') VERBS.push([v, meaning]);
-      btn.textContent = '✓ Сохранено!';
-      btn.classList.remove('saving');
-      btn.classList.add('saved');
-    } else {
-      const err = await putRes.json();
-      throw new Error(err.message);
+    // 5. Push to GitHub
+    const putRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: `add: ${v}`, content: encoded, sha })
+      }
+    );
+
+    if (!putRes.ok) {
+      const e = await putRes.json();
+      throw new Error(e.message || `GitHub ${putRes.status}`);
     }
+
+    // 6. Update local list
+    if (typeof VERBS !== 'undefined') VERBS.push([v, meaning]);
+    btn.textContent = '✓ Сохранено!';
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+
   } catch(e) {
-    btn.textContent = '✗ Ошибка: ' + e.message.slice(0,30);
+    btn.textContent = '✗ ' + e.message.slice(0, 35);
     btn.classList.remove('saving');
     btn.disabled = false;
   }
