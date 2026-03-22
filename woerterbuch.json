@@ -1,1 +1,47 @@
-{}
+{
+  "sein": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "быть, являться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv2/sein.mp3",
+    "hauptformen": {
+      "text": "ist · war · ist gewesen",
+      "mp3": "https://www.verbformen.de/konjugation/indikativ/perfekt/sein.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "bin",
+        "du": "bist",
+        "er/sie/es": "ist",
+        "wir": "sind",
+        "ihr": "seid",
+        "sie/Sie": "sind"
+      },
+      "praeteritum": {
+        "ich": "war",
+        "du": "warst",
+        "er/sie/es": "war",
+        "wir": "waren",
+        "ihr": "wart",
+        "sie/Sie": "waren"
+      },
+      "perfekt": {
+        "ich": "bin gewesen",
+        "du": "bist gewesen",
+        "er/sie/es": "ist gewesen",
+        "wir": "sind gewesen",
+        "ihr": "seid gewesen",
+        "sie/Sie": "sind gewesen"
+      },
+      "konjunktiv2": {
+        "ich": "wäre",
+        "du": "wärest",
+        "er/sie/es": "wäre",
+        "wir": "wären",
+        "ihr": "wäret",
+        "sie/Sie": "wären"
+      }
+    }
+  }
+}
