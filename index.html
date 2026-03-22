@@ -598,7 +598,7 @@ function render(d) {
 
   const tags = [];
   if (d.niveau) tags.push(d.niveau);
-  if (d.unregelmaessig) tags.push('unregelmäßig');
+  if (d.verbType) tags.push(d.verbType);
   if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
 
   const rInfMp3 = d.mp3s?.perfekt || d.mp3s?.praesens || '';
