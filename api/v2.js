@@ -138,15 +138,22 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung — find Russian translation
-  // verbformen.ru: translations are Russian verb infinitives like "иметь, обладать, владеть"
-  // Match: word ending in -ть/-чь/-ться followed by comma-separated similar words
+  // Bedeutung — find Russian translation (appears before pronunciation /zaɪn/ etc)
   let bedeutung = '';
-  const transRe = /[а-яёА-ЯЁ]{3,}(?:ть|чь|ться)[а-яёА-ЯЁ ,\-]{5,100}/g;
-  const navWords = /форм|пример|перев|знач|правил|спряж/i;
-  for (const m of html.matchAll(transRe)) {
-    const t = m[0].trim().replace(/,\s*$/, '');
-    if (!navWords.test(t) && t.length > bedeutung.length) bedeutung = t.slice(0, 100);
+  const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств/i;
+  // Find pronunciation line (IPA transcription starts with /)
+  const pronM = html.match(/\/[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː\.]+\//);
+  if (pronM) {
+    const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
+    // Find all Cyrillic blocks, take the last valid one
+    const cyrBlocks = [...chunk.matchAll(/[а-яёА-ЯЁ][а-яёА-ЯЁ\s,\-\.]{8,150}/g)];
+    for (const b of [...cyrBlocks].reverse()) {
+      const t = b[0].trim().replace(/[,\s]+$/, '');
+      if (!skipRe.test(t) && t.length > 5) {
+        bedeutung = t.slice(0, 120);
+        break;
+      }
+    }
   }
 
   // Niveau
