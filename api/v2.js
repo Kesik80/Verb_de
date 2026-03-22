@@ -125,31 +125,32 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung — find Russian translation
+  // Bedeutung — find Russian translation after flag image
   let bedeutung = '';
-  // 1. Try vMng class
-  const vMngM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,400}?)<\//);
-  if (vMngM) {
-    const t = strip(vMngM[1]);
-    if (/[\u0430-\u044f\u0451]/.test(t)) bedeutung = t.slice(0, 120);
-  }
-  // 2. Look for Russian flag img then grab text after it
-  if (!bedeutung) {
-    const flagIdx = html.indexOf('/ru.svg');
-    if (flagIdx !== -1) {
-      const after = html.slice(flagIdx, flagIdx + 400);
-      const t = strip(after).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
-      if (t.length > 5) bedeutung = t.slice(0, 120);
+  // verbformen.ru shows translations like: 🇷🇺 быть, являться...
+  // The flag is rendered as <img src="...ru.svg"> or similar
+  // Find the translation block by looking for flag then Cyrillic text on same line
+  const flagPatterns = ['/ru.svg', '/ru.png', 'flag-ru', 'russia'];
+  for (const pat of flagPatterns) {
+    const idx = html.indexOf(pat);
+    if (idx === -1) continue;
+    // Get text in next 300 chars after flag
+    const chunk = html.slice(idx, idx + 400);
+    const t = strip(chunk).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
+    // Must start with Cyrillic, avoid nav words
+    const navRe = /^(формы|примеры|переводы|значени|вывод|правил|спряж|английск|немецк)/i;
+    if (t.length > 5 && !navRe.test(t)) {
+      bedeutung = t.slice(0, 100).replace(/\s*[»\|].*/,'').trim();
+      break;
     }
   }
-  // 3. Find comma-separated Cyrillic words, skip navigation words
+  // Fallback: find text right before pronunciation line /zaɪn/
   if (!bedeutung) {
-    const navRe = /формы|примеры|переводы|значени|вывод|правил|спряж|глагол|существ/i;
-    const all = [...html.matchAll(/([\u0410-\u042f\u0430-\u044f\u0401\u0451][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,20}(?:,\s*[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,20}){2,})/g)];
-    for (const m of all) {
-      if (!navRe.test(m[0]) && m[0].length > bedeutung.length) {
-        bedeutung = m[0].slice(0, 120).trim();
-      }
+    const pronIdx = html.indexOf('/z') !== -1 ? html.indexOf('/z') : html.indexOf('/h');
+    if (pronIdx > 0) {
+      const before = html.slice(Math.max(0, pronIdx - 500), pronIdx);
+      const t = strip(before).replace(/^[\s\S]*?([\u0410-\u042f\u0430-\u044f\u0401\u0451].{5,100})$/, '$1');
+      if (/[\u0430-\u044f\u0451]/.test(t)) bedeutung = t.slice(0, 100).trim();
     }
   }
 
