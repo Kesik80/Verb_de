@@ -236,16 +236,21 @@ function parse(html, word) {
   // MP3 URLs
   const mp3s = {};
   const mp3Segs = {
-    praesens:   'indikativ/praesens/',
-    praeteritum:'indikativ/praeteritum/',
-    perfekt:    'indikativ/perfekt/',
-    konjunktiv2:'konjunktiv/praeteritum/',
-    infinitiv:  'konjugation/infinitiv',
+    praesens:    'indikativ/praesens/',
+    praeteritum: 'indikativ/praeteritum/',
+    perfekt:     'indikativ/perfekt/',
+    konjunktiv2: 'konjunktiv/praeteritum/',
   };
   for (const [key, seg] of Object.entries(mp3Segs)) {
     const url = findMp3(html, seg);
     if (url) mp3s[key] = url;
   }
+  // Infinitiv: prefer /infinitiv/ over /infinitiv1/ or /infinitiv2/
+  mp3s.infinitiv = findMp3(html, '/konjugation/infinitiv/') ||
+                   findMp3(html, 'konjugation/infinitiv1/') ||
+                   findMp3(html, 'konjugation/infinitiv2/') || '';
+  // Stammformen (Hauptformen audio)
+  mp3s.stammformen = findMp3(html, 'konjugation/stammformen/') || '';
 
   // Beispiele
   const beispiele = [];
