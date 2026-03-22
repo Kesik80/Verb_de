@@ -140,12 +140,10 @@ function parse(html, word) {
 
   // Bedeutung — find Russian translation (appears before pronunciation /zaɪn/ etc)
   let bedeutung = '';
-  const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств/i;
-  // Find pronunciation line (IPA transcription starts with /)
+  const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств|претеритум|конъюнктив|императив|перфект|плюсквам|футурум|инфинитив|партицип|упражне|грамматик|правила|переводы|значения|примеры|речевой вывод/i;
   const pronM = html.match(/\/[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː\.]+\//);
   if (pronM) {
     const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
-    // Find all Cyrillic blocks, take the last valid one
     const cyrBlocks = [...chunk.matchAll(/[а-яёА-ЯЁ][а-яёА-ЯЁ\s,\-\.]{8,150}/g)];
     for (const b of [...cyrBlocks].reverse()) {
       const t = b[0].trim().replace(/[,\s]+$/, '');
