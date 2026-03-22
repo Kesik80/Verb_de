@@ -63,6 +63,8 @@ function formatCell(h) {
     .replace(/\/[^\s,]+/g, '')
     // Remove footnote superscripts: ⁵ ⁶ etc
     .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
+    // Remove parentheses, keep content: sprech(e) → spreche, hab(e) → habe
+    .replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]+)\)/g, '$1')
     .replace(/\s+/g, ' ').trim();
 }
 
