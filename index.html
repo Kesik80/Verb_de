@@ -746,86 +746,106 @@ window.addEventListener('DOMContentLoaded', () => {
 
 let currentVerb = null; // stores last rendered verb data
 
+async function ghGet(token, file) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
+    { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' } }
+  );
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `GitHub ${res.status}`); }
+  const data = await res.json();
+  const bytes = Uint8Array.from(atob(data.content.replace(/\s/g,'')), c => c.charCodeAt(0));
+  return { content: new TextDecoder().decode(bytes), sha: data.sha };
+}
+
+async function ghPut(token, file, sha, content, message) {
+  const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(content)));
+  const res = await fetch(
+    `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
+    {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, content: encoded, sha })
+    }
+  );
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `GitHub ${res.status}`); }
+  return res.json();
+}
+
 async function saveVerb() {
   const btn = document.getElementById('saveBtn');
   if (!btn) return;
-
-  if (!currentVerb || !currentVerb.infinitiv) {
-    btn.textContent = '✗ Нет данных';
-    return;
-  }
+  if (!currentVerb?.infinitiv) { btn.textContent = '✗ Нет данных'; return; }
 
   const token = (localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim()).trim();
-  if (!token) {
-    alert('Введи GitHub Token в поле выше и нажми 💾');
-    return;
-  }
+  if (!token) { alert('Введи GitHub Token выше'); return; }
 
   const v = currentVerb.infinitiv;
-
-  // Check if already saved locally
-  if (typeof VERBS !== 'undefined' && VERBS.some(([w]) => w === v)) {
-    btn.textContent = '✓ Уже в словаре';
-    btn.classList.add('saved');
-    return;
-  }
 
   btn.textContent = '⏳ Сохраняю…';
   btn.classList.add('saving');
   btn.disabled = true;
 
   try {
-    // 1. Get current verbs.js from GitHub
-    const getRes = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
-      { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' } }
-    );
-    if (!getRes.ok) {
-      const e = await getRes.json();
-      throw new Error(e.message || `GitHub ${getRes.status}`);
-    }
-    const fileData = await getRes.json();
-    const sha = fileData.sha;
-    // Decode base64 — handle UTF-8
-    const bytes = Uint8Array.from(atob(fileData.content.replace(/\s/g,'')), c => c.charCodeAt(0));
-    const currentContent = new TextDecoder().decode(bytes);
+    // 1. Save to woerterbuch.json (full data)
+    const { content: wbRaw, sha: wbSha } = await ghGet(token, 'woerterbuch.json');
+    const wb = JSON.parse(wbRaw);
 
-    // 2. Build new line
+    if (wb[v]) {
+      btn.textContent = '✓ Уже в словаре';
+      btn.classList.remove('saving');
+      btn.classList.add('saved');
+      return;
+    }
+
+    // Build entry
     const meaning = currentVerb.bedeutung
       ? currentVerb.bedeutung.split(',').slice(0,3).map(s=>s.trim()).join(', ')
       : '';
-    const safe = meaning.replace(/'/g, "\'");
-    const newLine = `  ['${v}','${safe}'],\n`;
 
-    // 3. Insert before last ];
-    const insertAt = currentContent.lastIndexOf('];');
-    if (insertAt === -1) throw new Error('verbs.js format error');
-    const newContent = currentContent.slice(0, insertAt) + newLine + currentContent.slice(insertAt);
-
-    // 4. Encode UTF-8 → base64
-    const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(newContent)));
-
-    // 5. Push to GitHub
-    const putRes = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: `add: ${v}`, content: encoded, sha })
+    wb[v] = {
+      niveau:    currentVerb.niveau || '',
+      typ:       currentVerb.verbType || '',
+      hilfsverb: currentVerb.hilfsverb || 'haben',
+      bedeutung: meaning,
+      mp3:       currentVerb.mp3s?.infinitiv || '',
+      hauptformen: {
+        text: currentVerb.rInfStr || '',
+        mp3:  currentVerb.mp3s?.perfekt || ''
+      },
+      tabelle: {
+        praesens:    currentVerb.tenses?.praesens    || {},
+        praeteritum: currentVerb.tenses?.praeteritum || {},
+        perfekt:     currentVerb.tenses?.perfekt     || {},
+        konjunktiv2: currentVerb.tenses?.konjunktiv2 || {}
       }
+    };
+
+    // Sort by niveau then alphabetically
+    const niveauOrder = ['A1','A2','B1','B2','C1','C2',''];
+    const sorted = Object.fromEntries(
+      Object.entries(wb).sort(([a,av],[b,bv]) => {
+        const ni = niveauOrder.indexOf(av.niveau||'') - niveauOrder.indexOf(bv.niveau||'');
+        if (ni !== 0) return ni;
+        return a.localeCompare(b, 'de');
+      })
     );
 
-    if (!putRes.ok) {
-      const e = await putRes.json();
-      throw new Error(e.message || `GitHub ${putRes.status}`);
-    }
+    await ghPut(token, 'woerterbuch.json', wbSha, JSON.stringify(sorted, null, 2), `add: ${v}`);
 
-    // 6. Update local list
-    if (typeof VERBS !== 'undefined') VERBS.push([v, meaning]);
+    // 2. Also add to verbs.js for autocomplete
+    try {
+      const { content: verbsRaw, sha: verbsSha } = await ghGet(token, 'verbs.js');
+      if (!verbsRaw.includes(`['${v}'`)) {
+        const safe = meaning.replace(/'/g, "\'");
+        const insertAt = verbsRaw.lastIndexOf('];');
+        if (insertAt !== -1) {
+          const newVerbs = verbsRaw.slice(0, insertAt) + `  ['${v}','${safe}'],\n` + verbsRaw.slice(insertAt);
+          await ghPut(token, 'verbs.js', verbsSha, newVerbs, `add autocomplete: ${v}`);
+          if (typeof VERBS !== 'undefined') VERBS.push([v, meaning]);
+        }
+      }
+    } catch(e2) { console.warn('verbs.js update failed:', e2); }
+
     btn.textContent = '✓ Сохранено!';
     btn.classList.remove('saving');
     btn.classList.add('saved');
