@@ -340,6 +340,11 @@
 
   .no-data { color: var(--muted); font-size: 13px; font-style: italic; }
 
+  .verb-meta { margin-bottom: 8px; }
+  .verb-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .speak-lg { font-size: 22px !important; }
+  .verb-bedeutung { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
   /* verbformen.ru markup */
   .vf-stress { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
   .vf-it { font-style: italic; opacity: 0.85; }
@@ -596,16 +601,16 @@ function render(d) {
   if (d.unregelmaessig) tags.push('unregelmäßig');
   if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
 
+  const rInfMp3 = d.mp3s?.perfekt || d.mp3s?.praesens || '';
   resultEl.innerHTML = `
     <div class="verb-header">
-      <div>
-        <div class="verb-title">${d.infinitiv}${d.mp3s?.infinitiv ? `<button class="speak-btn" style="font-size:20px;margin-left:8px" onclick="speak('${d.mp3s.infinitiv}')">🔊</button>` : ''}</div>
-        ${hauptformenStr ? `<div class="verb-forms">${hauptformenStr}</div>` : ''}
+      <div class="verb-meta">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="verb-title-row">
+        <div class="verb-title">${d.infinitiv}</div>
+        ${d.mp3s?.infinitiv ? `<button class="speak-btn speak-lg" onclick="speak('${d.mp3s.infinitiv}')">🔊</button>` : ''}
       </div>
-      <div class="verb-right">
-        ${d.bedeutung ? `<div class="verb-bedeutung">${d.bedeutung}</div>` : ''}
-        ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
-      </div>
+      ${hauptformenStr ? `<div class="verb-forms">${hauptformenStr}${rInfMp3 ? `<button class="speak-btn" onclick="speak('${rInfMp3}')">🔊</button>` : ''}</div>` : ''}
+      ${d.bedeutung ? `<div class="verb-bedeutung">🇷🇺 ${d.bedeutung}</div>` : ''}
     </div>
 
     ${mainTable}
