@@ -1,4 +1,50 @@
 {
+  "haben": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "иметь, обладать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/haben.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/haben.mp3",
+    "hauptformen": {
+      "text": "hat · hatte · hat gehabt",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/haben.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "habe",
+        "du": "hast",
+        "er/sie/es": "hat",
+        "wir": "haben",
+        "ihr": "habt",
+        "sie/Sie": "haben"
+      },
+      "praeteritum": {
+        "ich": "hatte",
+        "du": "hattest",
+        "er/sie/es": "hatte",
+        "wir": "hatten",
+        "ihr": "hattet",
+        "sie/Sie": "hatten"
+      },
+      "perfekt": {
+        "ich": "habe gehabt",
+        "du": "hast gehabt",
+        "er/sie/es": "hat gehabt",
+        "wir": "haben gehabt",
+        "ihr": "habt gehabt",
+        "sie/Sie": "haben gehabt"
+      },
+      "konjunktiv2": {
+        "ich": "hätte",
+        "du": "hättest",
+        "er/sie/es": "hätte",
+        "wir": "hätten",
+        "ihr": "hättet",
+        "sie/Sie": "hätten"
+      }
+    }
+  },
   "sein": {
     "niveau": "A1",
     "typ": "unregelmäßig",
