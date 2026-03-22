@@ -567,10 +567,7 @@ function render(d) {
         <thead>
           <tr>
             <th></th>
-            ${mainTenses.map(t => {
-              const mp3 = d.mp3s?.[t.key] || '';
-              return `<th>${t.name}${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</th>`;
-            }).join('')}
+            ${mainTenses.map(t => `<th>${t.name}</th>`).join('')}
           </tr>
         </thead>
         <tbody>${mainRows}</tbody>
