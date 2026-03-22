@@ -340,6 +340,26 @@
 
   .no-data { color: var(--muted); font-size: 13px; font-style: italic; }
 
+  /* verbformen.ru markup */
+  .vf-stress { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .vf-it { font-style: italic; opacity: 0.85; }
+  .vf-bold { font-weight: 700; }
+
+  /* TTS button */
+  .speak-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.15s;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  .speak-btn:hover { color: var(--accent); }
+
   .main-card {
     background: var(--surface);
     border: 1.5px solid var(--border);
@@ -529,7 +549,8 @@ function render(d) {
   const mainRows = PRONOUNS.map(p => {
     const cells = mainTenses.map(t => {
       const form = d.tenses?.[t.key]?.[p] || '—';
-      return `<td class="main-form">${form}</td>`;
+      const mp3 = d.mp3s?.[t.key] || '';
+      return `<td class="main-form"><span>${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</td>`;
     }).join('');
     return `<tr><td class="main-pronoun">${p}</td>${cells}</tr>`;
   }).join('');
@@ -553,7 +574,9 @@ function render(d) {
     if (!conj || Object.keys(conj).length === 0) return '';
     const rows = PRONOUNS.map(p => {
       const form = conj[p] || '—';
-      return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span></div>`;
+      const plainText = form.replace(/<[^>]+>/g,'');
+      const mp3 = d.mp3s?.konjunktiv2 || '';
+      return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</div>`;
     }).join('');
     return `
       <div class="tense-card">
@@ -576,7 +599,7 @@ function render(d) {
   resultEl.innerHTML = `
     <div class="verb-header">
       <div>
-        <div class="verb-title">${d.infinitiv}</div>
+        <div class="verb-title">${d.infinitiv}${d.mp3s?.infinitiv ? `<button class="speak-btn" style="font-size:20px;margin-left:8px" onclick="speak('${d.mp3s.infinitiv}')">🔊</button>` : ''}</div>
         ${hauptformenStr ? `<div class="verb-forms">${hauptformenStr}</div>` : ''}
       </div>
       <div class="verb-right">
@@ -597,6 +620,14 @@ function render(d) {
 
   resultEl.classList.add('visible');
   console.log('render done, tenseCards length:', tenseCards.length, 'tenses:', Object.keys(d.tenses||{}));
+}
+
+let currentAudio = null;
+function speak(url) {
+  if (!url) return;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  currentAudio = new Audio(url);
+  currentAudio.play();
 }
 </script>
 </body>
