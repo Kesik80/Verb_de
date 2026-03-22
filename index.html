@@ -554,8 +554,7 @@ function render(d) {
   const mainRows = PRONOUNS.map(p => {
     const cells = mainTenses.map(t => {
       const form = d.tenses?.[t.key]?.[p] || '—';
-      const mp3 = d.mp3s?.[t.key] || '';
-      return `<td class="main-form"><span>${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</td>`;
+      return `<td class="main-form">${form}</td>`;
     }).join('');
     return `<tr><td class="main-pronoun">${p}</td>${cells}</tr>`;
   }).join('');
@@ -565,7 +564,10 @@ function render(d) {
         <thead>
           <tr>
             <th></th>
-            ${mainTenses.map(t => `<th>${t.name}</th>`).join('')}
+            ${mainTenses.map(t => {
+              const mp3 = d.mp3s?.[t.key] || '';
+              return `<th>${t.name}${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</th>`;
+            }).join('')}
           </tr>
         </thead>
         <tbody>${mainRows}</tbody>
