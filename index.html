@@ -345,6 +345,40 @@
   .speak-lg { font-size: 22px !important; }
   .verb-bedeutung { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
+  /* Autocomplete */
+  .search-wrap { position: relative; }
+
+  .autocomplete {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 100;
+    display: none;
+  }
+
+  .autocomplete.visible { display: block; }
+
+  .ac-item {
+    padding: 10px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.1s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.active { background: rgba(79,195,247,0.08); }
+  .ac-item .ac-meaning { font-size: 11px; color: var(--muted); }
+  .ac-item .ac-verb { color: var(--text); }
+  .ac-item mark { background: none; color: var(--accent); font-weight: 700; }
+
   /* verbformen.ru markup */
   .vf-stress { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
   .vf-it { font-style: italic; opacity: 0.85; }
@@ -455,6 +489,7 @@
     <input type="text" id="verbInput" placeholder="Verb eingeben…" autocomplete="off" autocorrect="off" spellcheck="false">
     <button id="searchBtn" onclick="lookup()">Suchen</button>
   </div>
+  <div class="autocomplete" id="autocomplete"></div>
   <div class="examples">
     <div class="chip" onclick="quickSearch('sein')">sein</div>
     <div class="chip" onclick="quickSearch('haben')">haben</div>
@@ -481,7 +516,7 @@ const loadingEl = document.getElementById('loading');
 const errorEl  = document.getElementById('error');
 const resultEl = document.getElementById('result');
 
-verbInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+
 
 function quickSearch(v) { verbInput.value = v; lookup(); }
 
@@ -630,6 +665,59 @@ function render(d) {
 }
 
 let currentAudio = null;
+// Verb list with translations
+const VERBS = [
+  ['sein','быть'],['haben','иметь'],['werden','становиться'],['können','мочь'],
+  ['müssen','должен'],['sollen','следует'],['wollen','хотеть'],['dürfen','сметь'],
+  ['mögen','любить'],['gehen','идти'],['kommen','приходить'],['machen','делать'],
+  ['sagen','говорить'],['sehen','видеть'],['sprechen','говорить'],['geben','давать'],
+  ['nehmen','брать'],['finden','находить'],['lassen','оставлять'],['stehen','стоять'],
+  ['bleiben','оставаться'],['liegen','лежать'],['heißen','называться'],['denken','думать'],
+  ['wissen','знать'],['fragen','спрашивать'],['fahren','ехать'],['laufen','бежать'],
+  ['arbeiten','работать'],['wohnen','жить'],['kaufen','покупать'],['trinken','пить'],
+  ['essen','есть'],['schlafen','спать'],['lesen','читать'],['schreiben','писать'],
+  ['hören','слышать'],['sehen','видеть'],['spielen','играть'],['lernen','учиться'],
+  ['helfen','помогать'],['bringen','приносить'],['öffnen','открывать'],['schließen','закрывать'],
+  ['beginnen','начинать'],['enden','заканчивать'],['kennen','знать'],['verstehen','понимать'],
+  ['vergessen','забывать'],['erinnern','помнить'],['treffen','встречать'],['fliegen','летать'],
+  ['schwimmen','плавать'],['singen','петь'],['tanzen','танцевать'],['kochen','готовить'],
+  ['waschen','мыть'],['putzen','чистить'],['zeigen','показывать'],['erklären','объяснять'],
+];
+
+const acEl = document.getElementById('autocomplete');
+let acIndex = -1;
+
+verbInput.addEventListener('input', () => {
+  const val = verbInput.value.trim().toLowerCase();
+  if (!val) { hideAc(); return; }
+  const matches = VERBS.filter(([v]) => v.startsWith(val) && v !== val).slice(0, 6);
+  if (!matches.length) { hideAc(); return; }
+  acIndex = -1;
+  acEl.innerHTML = matches.map(([v, m]) => {
+    const hl = `<mark>${v.slice(0, val.length)}</mark>${v.slice(val.length)}`;
+    return `<div class="ac-item" onclick="pickAc('${v}')"><span class="ac-verb">${hl}</span><span class="ac-meaning">${m}</span></div>`;
+  }).join('');
+  acEl.classList.add('visible');
+});
+
+verbInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { hideAc(); lookup(); return; }
+  const items = acEl.querySelectorAll('.ac-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex+1, items.length-1); updateAcActive(items); }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); acIndex = Math.max(acIndex-1, -1); updateAcActive(items); }
+  if (e.key === 'Tab' && acIndex >= 0) { e.preventDefault(); pickAc(items[acIndex].querySelector('.ac-verb').textContent.replace(/<[^>]+>/g,'')); }
+});
+
+function updateAcActive(items) {
+  items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+  if (acIndex >= 0) verbInput.value = items[acIndex].querySelector('.ac-verb').innerText;
+}
+
+function pickAc(v) { verbInput.value = v; hideAc(); lookup(); }
+function hideAc() { acEl.classList.remove('visible'); acIndex = -1; }
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) hideAc(); });
+
 function speak(url) {
   if (!url) return;
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
