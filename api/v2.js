@@ -125,10 +125,33 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung — extract Cyrillic translation list
+  // Bedeutung — find Russian translation
   let bedeutung = '';
-  const cyrM = html.match(/[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,25}(?:,\s*[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,25}){1,6}/);
-  if (cyrM) bedeutung = cyrM[0].slice(0, 120).trim();
+  // 1. Try vMng class
+  const vMngM = html.match(/class="[^"]*vMng[^"]*"[^>]*>([\s\S]{1,400}?)<\//);
+  if (vMngM) {
+    const t = strip(vMngM[1]);
+    if (/[\u0430-\u044f\u0451]/.test(t)) bedeutung = t.slice(0, 120);
+  }
+  // 2. Look for Russian flag img then grab text after it
+  if (!bedeutung) {
+    const flagIdx = html.indexOf('/ru.svg');
+    if (flagIdx !== -1) {
+      const after = html.slice(flagIdx, flagIdx + 400);
+      const t = strip(after).replace(/^[^а-яёА-ЯЁ]+/, '').trim();
+      if (t.length > 5) bedeutung = t.slice(0, 120);
+    }
+  }
+  // 3. Find comma-separated Cyrillic words, skip navigation words
+  if (!bedeutung) {
+    const navRe = /формы|примеры|переводы|значени|вывод|правил|спряж|глагол|существ/i;
+    const all = [...html.matchAll(/([\u0410-\u042f\u0430-\u044f\u0401\u0451][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,20}(?:,\s*[\u0430-\u044f\u0451\u0410-\u042f\u0401][\u0430-\u044f\u0451\u0410-\u042f\u0401\s\-]{2,20}){2,})/g)];
+    for (const m of all) {
+      if (!navRe.test(m[0]) && m[0].length > bedeutung.length) {
+        bedeutung = m[0].slice(0, 120).trim();
+      }
+    }
+  }
 
   // Niveau
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
