@@ -59,7 +59,11 @@ function formatCell(h) {
     .replace(/<[^>]+>/g,'')
     .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&shy;/g,'')
     .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-    .trim();
+    // Remove alternative forms after slash: "wurde/ward⁶" → "wurde"
+    .replace(/\/[^\s,]+/g, '')
+    // Remove footnote superscripts: ⁵ ⁶ etc
+    .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function findTableAfterMp3(html, mp3key) {
