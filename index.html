@@ -369,7 +369,8 @@
     background: var(--surface);
     border: 1.5px solid var(--border);
     border-radius: 16px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .main-table {
@@ -582,8 +583,7 @@ function render(d) {
     const rows = PRONOUNS.map(p => {
       const form = conj[p] || '—';
       const plainText = form.replace(/<[^>]+>/g,'');
-      const mp3 = d.mp3s?.konjunktiv2 || '';
-      return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span>${mp3 ? `<button class="speak-btn" onclick="speak('${mp3}')">🔊</button>` : ''}</div>`;
+      return `<div class="conj-row"><span class="pronoun">${p}</span><span class="form">${form}</span></div>`;
     }).join('');
     return `
       <div class="tense-card">
