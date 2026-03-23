@@ -690,8 +690,12 @@ function render(d) {
 
   const tags = [];
   if (d.niveau) tags.push(d.niveau);
-  if (d.verbType) tags.push(d.verbType);
-  if (d.hilfsverb) tags.push(`Hilfsverb: ${d.hilfsverb}`);
+  if (d.verbType) {
+    const typRu = d.verbType === 'unregelmäßig' ? 'неправильный' :
+                  d.verbType === 'regelmäßig'   ? 'правильный' : d.verbType;
+    tags.push(typRu);
+  }
+  if (d.hilfsverb) tags.push(`вспом.: ${d.hilfsverb}`);
 
   const rInfMp3 = d.mp3s?.stammformen || d.mp3s?.perfekt || d.mp3s?.praesens || '';
   resultEl.innerHTML = `
