@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wörterbuch Export</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f18;
+    --surface: #13151f;
+    --surface2: #1a1d2e;
+    --border: #2a2d3e;
+    --accent: #4fc3f7;
+    --accent2: #7c4dff;
+    --text: #e8eaf6;
+    --muted: #6b7280;
+    --green: #6dbd8a;
+    --red: #e07878;
+    --yellow: #d4a855;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 32px 12px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header { text-align: center; margin-bottom: 32px; }
+
+  .logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle { color: var(--muted); font-size: 12px; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .back-link { color: var(--muted); font-size: 12px; text-decoration: none; margin-top: 8px; display: inline-block; }
+  .back-link:hover { color: var(--accent); }
+
+  .card {
+    width: 100%;
+    max-width: 600px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .export-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .export-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .export-btn:hover { border-color: var(--accent); background: rgba(79,195,247,0.06); }
+
+  .export-btn .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .export-btn .name { font-family: 'Unbounded', sans-serif; font-size: 11px; color: var(--text); letter-spacing: 1px; }
+  .export-btn .desc { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  .export-btn.json { border-color: rgba(79,195,247,0.3); }
+  .export-btn.csv  { border-color: rgba(109,189,138,0.3); }
+  .export-btn.pdf  { border-color: rgba(212,168,85,0.3); }
+  .export-btn.anki { border-color: rgba(124,77,255,0.3); }
+
+  .verb-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 4px;
+  }
+
+  .verb-row {
+    display: grid;
+    grid-template-columns: 120px 80px 80px 1fr;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .verb-row:last-child { border-bottom: none; }
+  .verb-name { color: var(--accent); font-weight: 500; }
+  .verb-niveau { color: var(--yellow); font-size: 10px; }
+  .verb-typ { color: var(--muted); font-size: 10px; }
+  .verb-bedeutung { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .loading { color: var(--muted); text-align: center; padding: 30px; }
+  .spinner { width: 30px; height: 30px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error { color: var(--red); text-align: center; padding: 20px; font-size: 13px; }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .filter-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(79,195,247,0.08); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Wörterbuch</div>
+  <div class="subtitle">Экспорт словаря</div>
+  <a class="back-link" href="/">← Назад</a>
+</header>
+
+<div class="card" id="statsCard">
+  <div class="loading"><div class="spinner"></div>Загрузка словаря…</div>
+</div>
+
+<div class="card" id="exportCard" style="display:none">
+  <h2>Экспорт</h2>
+  <div class="export-grid">
+    <div class="export-btn json" onclick="exportJSON()">
+      <span class="icon">📄</span>
+      <div class="name">JSON</div>
+      <div class="desc">Полный словарь</div>
+    </div>
+    <div class="export-btn csv" onclick="exportCSV()">
+      <span class="icon">📊</span>
+      <div class="name">CSV</div>
+      <div class="desc">Для Excel / Sheets</div>
+    </div>
+    <div class="export-btn pdf" onclick="exportPDF()">
+      <span class="icon">📋</span>
+      <div class="name">PDF</div>
+      <div class="desc">Таблица для печати</div>
+    </div>
+    <div class="export-btn anki" onclick="exportAnki()">
+      <span class="icon">🃏</span>
+      <div class="name">Anki</div>
+      <div class="desc">Карточки (.txt)</div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="listCard" style="display:none">
+  <h2>Словарь <span id="countBadge" style="color:var(--accent)"></span></h2>
+  <div class="filter-row" id="filterRow"></div>
+  <div class="verb-list" id="verbList"></div>
+</div>
+
+<script>
+const GH_RAW = 'https://raw.githubusercontent.com/Kesik80/Verb_de/main/woerterbuch.json';
+const PRONOUNS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
+let wbData = {};
+let activeFilter = 'all';
+
+async function load() {
+  try {
+    const res = await fetch(GH_RAW + '?t=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    wbData = await res.json();
+    render();
+  } catch(e) {
+    document.getElementById('statsCard').innerHTML = `<div class="error">Ошибка загрузки: ${e.message}<br><small>Убедись что woerterbuch.json есть в репо</small></div>`;
+  }
+}
+
+function render() {
+  const verbs = Object.entries(wbData);
+  const total = verbs.length;
+  const unreg = verbs.filter(([,v]) => v.typ === 'unregelmäßig').length;
+  const reg   = verbs.filter(([,v]) => v.typ === 'regelmäßig').length;
+
+  // Stats
+  document.getElementById('statsCard').innerHTML = `
+    <h2>Статистика</h2>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">Глаголов</div></div>
+      <div class="stat"><div class="stat-num">${unreg}</div><div class="stat-label">Неправильных</div></div>
+      <div class="stat"><div class="stat-num">${reg}</div><div class="stat-label">Правильных</div></div>
+    </div>
+  `;
+
+  document.getElementById('exportCard').style.display = '';
+  document.getElementById('listCard').style.display = '';
+
+  // Filters
+  const niveaux = ['all', ...new Set(verbs.map(([,v]) => v.niveau).filter(Boolean).sort())];
+  document.getElementById('filterRow').innerHTML = niveaux.map(n => `
+    <div class="filter-chip ${n === activeFilter ? 'active' : ''}" onclick="setFilter('${n}')">
+      ${n === 'all' ? 'Все' : n}
+    </div>
+  `).join('');
+
+  // List
+  const filtered = activeFilter === 'all' ? verbs : verbs.filter(([,v]) => v.niveau === activeFilter);
+  document.getElementById('countBadge').textContent = `(${filtered.length})`;
+  document.getElementById('verbList').innerHTML = filtered.map(([inf, v]) => `
+    <div class="verb-row">
+      <span class="verb-name">${inf}</span>
+      <span class="verb-niveau">${v.niveau || '—'}</span>
+      <span class="verb-typ">${v.typ === 'unregelmäßig' ? 'непр.' : v.typ === 'regelmäßig' ? 'пр.' : '—'}</span>
+      <span class="verb-bedeutung">${v.bedeutung || '—'}</span>
+    </div>
+  `).join('');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  render();
+}
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON() {
+  download('woerterbuch.json', JSON.stringify(wbData, null, 2), 'application/json');
+}
+
+function exportCSV() {
+  const rows = [['Infinitiv','Niveau','Typ','Hilfsverb','Bedeutung','Hauptformen',
+    'Präs.ich','Präs.du','Präs.er','Präs.wir','Präs.ihr','Präs.sie',
+    'Prät.ich','Prät.du','Prät.er','Prät.wir','Prät.ihr','Prät.sie',
+    'Perf.ich','Perf.du','Perf.er','Perf.wir','Perf.ihr','Perf.sie',
+    'Konj2.ich','Konj2.du','Konj2.er','Konj2.wir','Konj2.ihr','Konj2.sie'
+  ]];
+
+  for (const [inf, v] of Object.entries(wbData)) {
+    const pr = v.tabelle?.praesens    || {};
+    const pt = v.tabelle?.praeteritum || {};
+    const pf = v.tabelle?.perfekt     || {};
+    const k2 = v.tabelle?.konjunktiv2 || {};
+    rows.push([
+      inf, v.niveau||'', v.typ||'', v.hilfsverb||'', v.bedeutung||'',
+      v.hauptformen?.text||'',
+      ...PRONOUNS.map(p => pr[p]||''),
+      ...PRONOUNS.map(p => pt[p]||''),
+      ...PRONOUNS.map(p => pf[p]||''),
+      ...PRONOUNS.map(p => k2[p]||''),
+    ]);
+  }
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  download('woerterbuch.csv', '\uFEFF' + csv, 'text/csv;charset=utf-8');
+}
+
+function exportAnki() {
+  // Anki format: front TAB back (one card per verb)
+  // Front: infinitiv + hauptformen
+  // Back: bedeutung + full table
+  const lines = [];
+  for (const [inf, v] of Object.entries(wbData)) {
+    const pr = v.tabelle?.praesens    || {};
+    const pt = v.tabelle?.praeteritum || {};
+    const pf = v.tabelle?.perfekt     || {};
+    const k2 = v.tabelle?.konjunktiv2 || {};
+
+    const front = `<b style="font-size:1.4em">${inf}</b><br><i>${v.hauptformen?.text||''}</i>`;
+
+    const tableHtml = (tenses) => PRONOUNS.map(p =>
+      `<tr><td style="color:#888;padding:2px 8px">${p}</td><td style="padding:2px 8px">${tenses[p]||'—'}</td></tr>`
+    ).join('');
+
+    const back = `
+      <div style="font-size:1.1em;color:#4fc3f7">${inf}</div>
+      <div style="color:#d4a855;margin:4px 0">${v.hauptformen?.text||''}</div>
+      <div style="color:#6b7280;margin-bottom:8px">${v.niveau||''} · ${v.typ||''} · вспом.: ${v.hilfsverb||''}</div>
+      <div style="font-size:1.1em;margin-bottom:10px">🇷🇺 ${v.bedeutung||''}</div>
+      <table style="font-family:monospace;font-size:0.9em;border-collapse:collapse">
+        <tr><th style="padding:2px 8px;color:#4fc3f7">Präs.</th><th style="padding:2px 8px;color:#d4a855">Prät.</th><th style="padding:2px 8px;color:#6dbd8a">Perf.</th><th style="padding:2px 8px;color:#7c4dff">Konj.II</th></tr>
+        ${PRONOUNS.map(p => `<tr>
+          <td style="padding:2px 8px">${pr[p]||'—'}</td>
+          <td style="padding:2px 8px;color:#d4a855">${pt[p]||'—'}</td>
+          <td style="padding:2px 8px;color:#6dbd8a">${pf[p]||'—'}</td>
+          <td style="padding:2px 8px;color:#9c7dff">${k2[p]||'—'}</td>
+        </tr>`).join('')}
+      </table>
+    `.replace(/\n\s+/g,' ').trim();
+
+    lines.push(`${front}\t${back}\t${inf}`);
+  }
+
+  download('woerterbuch_anki.txt', lines.join('\n'), 'text/plain;charset=utf-8');
+}
+
+function exportPDF() {
+  const verbs = Object.entries(wbData);
+  if (!verbs.length) return;
+
+  const rows = verbs.map(([inf, v]) => {
+    const pr = v.tabelle?.praesens    || {};
+    const pt = v.tabelle?.praeteritum || {};
+    const pf = v.tabelle?.perfekt     || {};
+    return `
+      <tr>
+        <td><b>${inf}</b><br><span style="color:#666;font-size:0.85em">${v.bedeutung||''}</span></td>
+        <td style="color:#666;font-size:0.85em">${v.niveau||''}<br>${v.typ==='unregelmäßig'?'непр.':v.typ==='regelmäßig'?'пр.':''}</td>
+        <td style="color:#666;font-size:0.85em">${v.hilfsverb||''}</td>
+        <td style="font-size:0.9em">${v.hauptformen?.text||''}</td>
+        <td style="font-size:0.85em">${PRONOUNS.map(p=>pr[p]||'—').join('<br>')}</td>
+        <td style="font-size:0.85em;color:#b87300">${PRONOUNS.map(p=>pt[p]||'—').join('<br>')}</td>
+        <td style="font-size:0.85em;color:#2a7a4a">${PRONOUNS.map(p=>pf[p]||'—').join('<br>')}</td>
+      </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    body { font-family: 'Courier New', monospace; font-size: 11px; margin: 20px; }
+    h1 { font-size: 18px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f0f0f0; padding: 6px 8px; text-align: left; font-size: 10px; border: 1px solid #ddd; }
+    td { padding: 5px 8px; border: 1px solid #eee; vertical-align: top; }
+    tr:nth-child(even) { background: #fafafa; }
+  </style></head><body>
+  <h1>Deutsches Wörterbuch — ${verbs.length} Verben</h1>
+  <table>
+    <tr><th>Infinitiv</th><th>Niveau/Typ</th><th>Hilfsv.</th><th>Hauptformen</th><th>Präsens</th><th>Präteritum</th><th>Perfekt</th></tr>
+    ${rows}
+  </table>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+load();
+</script>
+</body>
+</html>
