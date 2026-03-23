@@ -1,4 +1,50 @@
 {
+  "gehen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "идти, уходить",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/gehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/gehen.mp3",
+    "hauptformen": {
+      "text": "geht · ging · ist gegangen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/gehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "gehe",
+        "du": "gehst",
+        "er/sie/es": "geht",
+        "wir": "gehen",
+        "ihr": "geht",
+        "sie/Sie": "gehen"
+      },
+      "praeteritum": {
+        "ich": "ging",
+        "du": "gingst",
+        "er/sie/es": "ging",
+        "wir": "gingen",
+        "ihr": "gingt",
+        "sie/Sie": "gingen"
+      },
+      "perfekt": {
+        "ich": "bin gegangen",
+        "du": "bist gegangen",
+        "er/sie/es": "ist gegangen",
+        "wir": "sind gegangen",
+        "ihr": "seid gegangen",
+        "sie/Sie": "sind gegangen"
+      },
+      "konjunktiv2": {
+        "ich": "ginge",
+        "du": "gingest",
+        "er/sie/es": "ginge",
+        "wir": "gingen",
+        "ihr": "ginget",
+        "sie/Sie": "gingen"
+      }
+    }
+  },
   "haben": {
     "niveau": "A1",
     "typ": "unregelmäßig",
