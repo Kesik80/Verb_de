@@ -179,6 +179,7 @@
   <div class="logo">Wörterbuch</div>
   <div class="subtitle">Экспорт словаря</div>
   <a class="back-link" href="/">← Назад</a>
+  <button onclick="reload()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;margin-top:8px;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↻ Обновить</button>
 </header>
 
 <div class="card" id="statsCard">
@@ -218,16 +219,36 @@
 </div>
 
 <script>
-const GH_RAW = 'https://raw.githubusercontent.com/Kesik80/Verb_de/main/woerterbuch.json';
+const GH_OWNER = 'Kesik80';
+const GH_REPO  = 'Verb_de';
+const GH_FILE  = 'woerterbuch.json';
 const PRONOUNS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
 let wbData = {};
 let activeFilter = 'all';
 
 async function load() {
   try {
-    const res = await fetch(GH_RAW + '?t=' + Date.now());
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    wbData = await res.json();
+    const token = localStorage.getItem('gh_token') || '';
+    const headers = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    // Use GitHub API to bypass cache
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+    const res = await fetch(apiUrl, { headers: { ...headers, 'Accept': 'application/vnd.github+json' } });
+
+    if (!res.ok) {
+      // Fallback to raw with cache-bust
+      const raw = await fetch(
+        `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_FILE}?t=${Date.now()}`,
+        { cache: 'no-store' }
+      );
+      if (!raw.ok) throw new Error(`HTTP ${raw.status}`);
+      wbData = await raw.json();
+    } else {
+      const data = await res.json();
+      const bytes = Uint8Array.from(atob(data.content.replace(/\s/g,'')), c => c.charCodeAt(0));
+      wbData = JSON.parse(new TextDecoder().decode(bytes));
+    }
     render();
   } catch(e) {
     document.getElementById('statsCard').innerHTML = `<div class="error">Ошибка загрузки: ${e.message}<br><small>Убедись что woerterbuch.json есть в репо</small></div>`;
@@ -399,6 +420,12 @@ function exportPDF() {
   setTimeout(() => w.print(), 500);
 }
 
+function reload() {
+  document.getElementById('statsCard').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+  document.getElementById('exportCard').style.display = 'none';
+  document.getElementById('listCard').style.display = 'none';
+  load();
+}
 load();
 </script>
 </body>
