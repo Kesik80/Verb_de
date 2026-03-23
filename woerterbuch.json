@@ -137,6 +137,52 @@
       }
     }
   },
+  "schlafen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "спать, засыпать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/schlafen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/schlafen.mp3",
+    "hauptformen": {
+      "text": "schläft · schlief · hat geschlafen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/schlafen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "schlafe",
+        "du": "schläfst",
+        "er/sie/es": "schläft",
+        "wir": "schlafen",
+        "ihr": "schlaft",
+        "sie/Sie": "schlafen"
+      },
+      "praeteritum": {
+        "ich": "schlief",
+        "du": "schliefst",
+        "er/sie/es": "schlief",
+        "wir": "schliefen",
+        "ihr": "schlieft",
+        "sie/Sie": "schliefen"
+      },
+      "perfekt": {
+        "ich": "habe geschlafen",
+        "du": "hast geschlafen",
+        "er/sie/es": "hat geschlafen",
+        "wir": "haben geschlafen",
+        "ihr": "habt geschlafen",
+        "sie/Sie": "haben geschlafen"
+      },
+      "konjunktiv2": {
+        "ich": "schliefe",
+        "du": "schliefest",
+        "er/sie/es": "schliefe",
+        "wir": "schliefen",
+        "ihr": "schliefet",
+        "sie/Sie": "schliefen"
+      }
+    }
+  },
   "sein": {
     "niveau": "A1",
     "typ": "unregelmäßig",
