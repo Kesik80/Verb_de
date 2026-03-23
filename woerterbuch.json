@@ -45,6 +45,52 @@
       }
     }
   },
+  "kommen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "приходить, прибывать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/kommen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/kommen.mp3",
+    "hauptformen": {
+      "text": "kommt · kam · ist gekommen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/kommen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "komme",
+        "du": "kommst",
+        "er/sie/es": "kommt",
+        "wir": "kommen",
+        "ihr": "kommt",
+        "sie/Sie": "kommen"
+      },
+      "praeteritum": {
+        "ich": "kam",
+        "du": "kamst",
+        "er/sie/es": "kam",
+        "wir": "kamen",
+        "ihr": "kamt",
+        "sie/Sie": "kamen"
+      },
+      "perfekt": {
+        "ich": "bin gekommen",
+        "du": "bist gekommen",
+        "er/sie/es": "ist gekommen",
+        "wir": "sind gekommen",
+        "ihr": "seid gekommen",
+        "sie/Sie": "sind gekommen"
+      },
+      "konjunktiv2": {
+        "ich": "käme",
+        "du": "kämest",
+        "er/sie/es": "käme",
+        "wir": "kämen",
+        "ihr": "kämet",
+        "sie/Sie": "kämen"
+      }
+    }
+  },
   "sein": {
     "niveau": "A1",
     "typ": "unregelmäßig",
