@@ -228,5 +228,51 @@
         "sie/Sie": "wären"
       }
     }
+  },
+  "sprechen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "говорить, разговаривать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/sprechen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/sprechen.mp3",
+    "hauptformen": {
+      "text": "spricht · sprach · hat gesprochen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/sprechen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "spreche",
+        "du": "sprichst",
+        "er/sie/es": "spricht",
+        "wir": "sprechen",
+        "ihr": "sprecht",
+        "sie/Sie": "sprechen"
+      },
+      "praeteritum": {
+        "ich": "sprach",
+        "du": "sprachst",
+        "er/sie/es": "sprach",
+        "wir": "sprachen",
+        "ihr": "spracht",
+        "sie/Sie": "sprachen"
+      },
+      "perfekt": {
+        "ich": "habe gesprochen",
+        "du": "hast gesprochen",
+        "er/sie/es": "hat gesprochen",
+        "wir": "haben gesprochen",
+        "ihr": "habt gesprochen",
+        "sie/Sie": "haben gesprochen"
+      },
+      "konjunktiv2": {
+        "ich": "spräche",
+        "du": "sprächest",
+        "er/sie/es": "spräche",
+        "wir": "sprächen",
+        "ihr": "sprächet",
+        "sie/Sie": "sprächen"
+      }
+    }
   }
 }
