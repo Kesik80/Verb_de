@@ -387,18 +387,18 @@
     padding: 8px 12px;
   }
   .token-save-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 10px;
     padding: 8px 14px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--muted);
+    color: var(--muted) !important;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.15s;
   }
-  .token-save-btn:hover { border-color: var(--green); color: var(--green); }
+  .token-save-btn:hover { border-color: var(--green) !important; color: var(--green) !important; }
 
   /* Autocomplete */
   .search-wrap { position: relative; }
@@ -529,9 +529,158 @@
     .verb-header { flex-direction: column; }
     .verb-right { text-align: left; }
   }
+
+  /* PWA Install Banner */
+  #pwa-banner {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1.5px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+    animation: slideUp 0.35s ease;
+    transform: translateZ(0);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  #pwa-banner.hidden { display: none; }
+  #pwa-banner .pwa-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  #pwa-banner .pwa-text { flex: 1; }
+  #pwa-banner .pwa-title {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    margin-bottom: 2px;
+  }
+  #pwa-banner .pwa-sub {
+    font-size: 11px; color: var(--muted); line-height: 1.4;
+  }
+  #pwa-banner .pwa-actions {
+    display: flex; gap: 8px; flex-shrink: 0;
+  }
+  #pwa-banner .pwa-install-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #pwa-banner .pwa-dismiss-btn {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted) !important;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pwa-ios-steps {
+    font-size: 11px; color: var(--muted);
+    margin-top: 4px; line-height: 1.6;
+  }
 </style>
 </head>
 <body>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner" class="hidden">
+  <div class="pwa-icon">📖</div>
+  <div class="pwa-text">
+    <div class="pwa-title">Установить приложение</div>
+    <div class="pwa-sub" id="pwa-sub-text">Добавить на главный экран для быстрого доступа</div>
+  </div>
+  <div class="pwa-actions">
+    <button class="pwa-install-btn" id="pwa-install-btn">Установить</button>
+    <button class="pwa-dismiss-btn" id="pwa-dismiss-btn">✕</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Don't show if already installed or dismissed recently
+  const dismissed = localStorage.getItem('pwa_dismissed');
+  if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
+
+  const banner = document.getElementById('pwa-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
+  const subText = document.getElementById('pwa-sub-text');
+
+  // Check if already installed as PWA
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  let deferredPrompt = null;
+
+  // Android: intercept native install prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    subText.textContent = 'Установить как приложение — работает офлайн';
+    installBtn.textContent = 'Установить';
+    banner.classList.remove('hidden');
+  });
+
+  // iOS: show manual instructions
+  if (isIOS && !isStandalone) {
+    // Delay a bit so page loads first
+    setTimeout(() => {
+      subText.innerHTML = 'Нажмите <strong style="color:var(--accent)">Поделиться</strong> → <strong style="color:var(--accent)">На экран «Домой»</strong>';
+      installBtn.textContent = 'Как?';
+      installBtn.onclick = () => {
+        subText.innerHTML = '1) Нажмите <strong style="color:var(--accent)">⎙</strong> внизу браузера<br>2) Выберите «На экран „Домой"»<br>3) Нажмите «Добавить»';
+        installBtn.style.display = 'none';
+      };
+      banner.classList.remove('hidden');
+    }, 1500);
+  }
+
+  // Android install click
+  if (!isIOS) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        banner.classList.add('hidden');
+      }
+    });
+  }
+
+  // Dismiss
+  dismissBtn.addEventListener('click', () => {
+    banner.classList.add('hidden');
+    localStorage.setItem('pwa_dismissed', Date.now().toString());
+  });
+
+  // Hide banner after install
+  window.addEventListener('appinstalled', () => {
+    banner.classList.add('hidden');
+  });
+})();
+</script>
 
 <header>
   <div class="logo">Verbkonjugation</div>
