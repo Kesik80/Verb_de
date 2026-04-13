@@ -599,5 +599,52 @@
         "sie/Sie": "gingen aus"
       }
     }
+  },
+  "anrufen": {
+    "addedAt": "2026-04-13T21:07:58.323Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "звонить, позвонить",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/anrufen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3",
+    "hauptformen": {
+      "text": "ruft an · rief an · hat angerufen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "rufe an",
+        "du": "rufst an",
+        "er/sie/es": "ruft an",
+        "wir": "rufen an",
+        "ihr": "ruft an",
+        "sie/Sie": "rufen an"
+      },
+      "praeteritum": {
+        "ich": "rief an",
+        "du": "riefst an",
+        "er/sie/es": "rief an",
+        "wir": "riefen an",
+        "ihr": "rieft an",
+        "sie/Sie": "riefen an"
+      },
+      "perfekt": {
+        "ich": "habe angerufen",
+        "du": "hast angerufen",
+        "er/sie/es": "hat angerufen",
+        "wir": "haben angerufen",
+        "ihr": "habt angerufen",
+        "sie/Sie": "haben angerufen"
+      },
+      "konjunktiv2": {
+        "ich": "riefe an",
+        "du": "riefest an",
+        "er/sie/es": "riefe an",
+        "wir": "riefen an",
+        "ihr": "riefet an",
+        "sie/Sie": "riefen an"
+      }
+    }
   }
 }
