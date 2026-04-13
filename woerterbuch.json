@@ -183,6 +183,52 @@
       }
     }
   },
+  "mitbringen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "приносить, приводить",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/mitbringen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/mitbringen.mp3",
+    "hauptformen": {
+      "text": "bringt mit · brachte mit · hat mitgebracht",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/mitbringen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "bringe mit",
+        "du": "bringst mit",
+        "er/sie/es": "bringt mit",
+        "wir": "bringen mit",
+        "ihr": "bringt mit",
+        "sie/Sie": "bringen mit"
+      },
+      "praeteritum": {
+        "ich": "brachte mit",
+        "du": "brachtest mit",
+        "er/sie/es": "brachte mit",
+        "wir": "brachten mit",
+        "ihr": "brachtet mit",
+        "sie/Sie": "brachten mit"
+      },
+      "perfekt": {
+        "ich": "habe mitgebracht",
+        "du": "hast mitgebracht",
+        "er/sie/es": "hat mitgebracht",
+        "wir": "haben mitgebracht",
+        "ihr": "habt mitgebracht",
+        "sie/Sie": "haben mitgebracht"
+      },
+      "konjunktiv2": {
+        "ich": "brächte mit",
+        "du": "brächtest mit",
+        "er/sie/es": "brächte mit",
+        "wir": "brächten mit",
+        "ihr": "brächtet mit",
+        "sie/Sie": "brächten mit"
+      }
+    }
+  },
   "schlafen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
