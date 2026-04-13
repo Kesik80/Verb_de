@@ -505,5 +505,52 @@
         "sie/Sie": "kauften ein"
       }
     }
+  },
+  "fernsehen": {
+    "addedAt": "2026-04-13T21:05:52.773Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "посмотреть телевизор, смотреть",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fernsehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3",
+    "hauptformen": {
+      "text": "sieht fern · sah fern · hat ferngesehen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "sehe fern",
+        "du": "siehst fern",
+        "er/sie/es": "sieht fern",
+        "wir": "sehen fern",
+        "ihr": "seht fern",
+        "sie/Sie": "sehen fern"
+      },
+      "praeteritum": {
+        "ich": "sah fern",
+        "du": "sahst fern",
+        "er/sie/es": "sah fern",
+        "wir": "sahen fern",
+        "ihr": "saht fern",
+        "sie/Sie": "sahen fern"
+      },
+      "perfekt": {
+        "ich": "habe ferngesehen",
+        "du": "hast ferngesehen",
+        "er/sie/es": "hat ferngesehen",
+        "wir": "haben ferngesehen",
+        "ihr": "habt ferngesehen",
+        "sie/Sie": "haben ferngesehen"
+      },
+      "konjunktiv2": {
+        "ich": "sähe fern",
+        "du": "sähest fern",
+        "er/sie/es": "sähe fern",
+        "wir": "sähen fern",
+        "ihr": "sähet fern",
+        "sie/Sie": "sähen fern"
+      }
+    }
   }
 }
