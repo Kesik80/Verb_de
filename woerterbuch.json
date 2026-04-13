@@ -834,5 +834,52 @@
         "sie/Sie": "wüschen"
       }
     }
+  },
+  "sehen": {
+    "addedAt": "2026-04-13T21:40:35.637Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "смотреть, видеть",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/sehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3",
+    "hauptformen": {
+      "text": "sieht · sah · hat gesehen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "sehe",
+        "du": "siehst",
+        "er/sie/es": "sieht",
+        "wir": "sehen",
+        "ihr": "seht",
+        "sie/Sie": "sehen"
+      },
+      "praeteritum": {
+        "ich": "sah",
+        "du": "sahst",
+        "er/sie/es": "sah",
+        "wir": "sahen",
+        "ihr": "saht",
+        "sie/Sie": "sahen"
+      },
+      "perfekt": {
+        "ich": "habe gesehen",
+        "du": "hast gesehen",
+        "er/sie/es": "hat gesehen",
+        "wir": "haben gesehen",
+        "ihr": "habt gesehen",
+        "sie/Sie": "haben gesehen"
+      },
+      "konjunktiv2": {
+        "ich": "sähe",
+        "du": "sähest",
+        "er/sie/es": "sähe",
+        "wir": "sähen",
+        "ihr": "sähet",
+        "sie/Sie": "sähen"
+      }
+    }
   }
 }
