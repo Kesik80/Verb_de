@@ -646,5 +646,52 @@
         "sie/Sie": "riefen an"
       }
     }
+  },
+  "ausschlafen": {
+    "addedAt": "2026-04-13T21:09:13.954Z",
+    "niveau": "A2",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "выспаться, высыпаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausschlafen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3",
+    "hauptformen": {
+      "text": "schläft aus · schlief aus · hat ausgeschlafen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "schlafe aus",
+        "du": "schläfst aus",
+        "er/sie/es": "schläft aus",
+        "wir": "schlafen aus",
+        "ihr": "schlaft aus",
+        "sie/Sie": "schlafen aus"
+      },
+      "praeteritum": {
+        "ich": "schlief aus",
+        "du": "schliefst aus",
+        "er/sie/es": "schlief aus",
+        "wir": "schliefen aus",
+        "ihr": "schlieft aus",
+        "sie/Sie": "schliefen aus"
+      },
+      "perfekt": {
+        "ich": "habe ausgeschlafen",
+        "du": "hast ausgeschlafen",
+        "er/sie/es": "hat ausgeschlafen",
+        "wir": "haben ausgeschlafen",
+        "ihr": "habt ausgeschlafen",
+        "sie/Sie": "haben ausgeschlafen"
+      },
+      "konjunktiv2": {
+        "ich": "schliefe aus",
+        "du": "schliefest aus",
+        "er/sie/es": "schliefe aus",
+        "wir": "schliefen aus",
+        "ihr": "schliefet aus",
+        "sie/Sie": "schliefen aus"
+      }
+    }
   }
 }
