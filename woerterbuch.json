@@ -881,5 +881,52 @@
         "sie/Sie": "sähen"
       }
     }
+  },
+  "lesen": {
+    "addedAt": "2026-04-13T21:40:44.358Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "читать, прочитать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/lesen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3",
+    "hauptformen": {
+      "text": "liest · las · hat gelesen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "lese",
+        "du": "liest",
+        "er/sie/es": "liest",
+        "wir": "lesen",
+        "ihr": "lest",
+        "sie/Sie": "lesen"
+      },
+      "praeteritum": {
+        "ich": "las",
+        "du": "lasest",
+        "er/sie/es": "las",
+        "wir": "lasen",
+        "ihr": "laset",
+        "sie/Sie": "lasen"
+      },
+      "perfekt": {
+        "ich": "habe gelesen",
+        "du": "hast gelesen",
+        "er/sie/es": "hat gelesen",
+        "wir": "haben gelesen",
+        "ihr": "habt gelesen",
+        "sie/Sie": "haben gelesen"
+      },
+      "konjunktiv2": {
+        "ich": "läse",
+        "du": "läsest",
+        "er/sie/es": "läse",
+        "wir": "läsen",
+        "ihr": "läset",
+        "sie/Sie": "läsen"
+      }
+    }
   }
 }
