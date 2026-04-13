@@ -458,5 +458,52 @@
         "sie/Sie": "wachten auf"
       }
     }
+  },
+  "einkaufen": {
+    "addedAt": "2026-04-13T21:04:52.661Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "покупать, делать покупки",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/einkaufen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3",
+    "hauptformen": {
+      "text": "kauft ein · kaufte ein · hat eingekauft",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "kaufe ein",
+        "du": "kaufst ein",
+        "er/sie/es": "kauft ein",
+        "wir": "kaufen ein",
+        "ihr": "kauft ein",
+        "sie/Sie": "kaufen ein"
+      },
+      "praeteritum": {
+        "ich": "kaufte ein",
+        "du": "kauftest ein",
+        "er/sie/es": "kaufte ein",
+        "wir": "kauften ein",
+        "ihr": "kauftet ein",
+        "sie/Sie": "kauften ein"
+      },
+      "perfekt": {
+        "ich": "habe eingekauft",
+        "du": "hast eingekauft",
+        "er/sie/es": "hat eingekauft",
+        "wir": "haben eingekauft",
+        "ihr": "habt eingekauft",
+        "sie/Sie": "haben eingekauft"
+      },
+      "konjunktiv2": {
+        "ich": "kaufte ein",
+        "du": "kauftest ein",
+        "er/sie/es": "kaufte ein",
+        "wir": "kauften ein",
+        "ihr": "kauftet ein",
+        "sie/Sie": "kauften ein"
+      }
+    }
   }
 }
