@@ -552,5 +552,52 @@
         "sie/Sie": "sähen fern"
       }
     }
+  },
+  "ausgehen": {
+    "addedAt": "2026-04-13T21:06:48.051Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "выходить, заканчиваться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausgehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3",
+    "hauptformen": {
+      "text": "geht aus · ging aus · ist ausgegangen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "gehe aus",
+        "du": "gehst aus",
+        "er/sie/es": "geht aus",
+        "wir": "gehen aus",
+        "ihr": "geht aus",
+        "sie/Sie": "gehen aus"
+      },
+      "praeteritum": {
+        "ich": "ging aus",
+        "du": "gingst aus",
+        "er/sie/es": "ging aus",
+        "wir": "gingen aus",
+        "ihr": "gingt aus",
+        "sie/Sie": "gingen aus"
+      },
+      "perfekt": {
+        "ich": "bin ausgegangen",
+        "du": "bist ausgegangen",
+        "er/sie/es": "ist ausgegangen",
+        "wir": "sind ausgegangen",
+        "ihr": "seid ausgegangen",
+        "sie/Sie": "sind ausgegangen"
+      },
+      "konjunktiv2": {
+        "ich": "ginge aus",
+        "du": "gingest aus",
+        "er/sie/es": "ginge aus",
+        "wir": "gingen aus",
+        "ihr": "ginget aus",
+        "sie/Sie": "gingen aus"
+      }
+    }
   }
 }
