@@ -740,5 +740,52 @@
         "sie/Sie": "führen"
       }
     }
+  },
+  "essen": {
+    "addedAt": "2026-04-13T21:37:19.429Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "есть, питаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/essen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3",
+    "hauptformen": {
+      "text": "isst · aß · hat gegessen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "esse",
+        "du": "isst",
+        "er/sie/es": "isst",
+        "wir": "essen",
+        "ihr": "esst",
+        "sie/Sie": "essen"
+      },
+      "praeteritum": {
+        "ich": "aß",
+        "du": "aßest",
+        "er/sie/es": "aß",
+        "wir": "aßen",
+        "ihr": "aßet",
+        "sie/Sie": "aßen"
+      },
+      "perfekt": {
+        "ich": "habe gegessen",
+        "du": "hast gegessen",
+        "er/sie/es": "hat gegessen",
+        "wir": "haben gegessen",
+        "ihr": "habt gegessen",
+        "sie/Sie": "haben gegessen"
+      },
+      "konjunktiv2": {
+        "ich": "äße",
+        "du": "äßest",
+        "er/sie/es": "äße",
+        "wir": "äßen",
+        "ihr": "äßet",
+        "sie/Sie": "äßen"
+      }
+    }
   }
 }
