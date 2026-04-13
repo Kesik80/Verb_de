@@ -693,5 +693,52 @@
         "sie/Sie": "schliefen aus"
       }
     }
+  },
+  "fahren": {
+    "addedAt": "2026-04-13T21:36:58.158Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "водить, везти",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fahren_hat.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3",
+    "hauptformen": {
+      "text": "fährt · fuhr · hat gefahren",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "fahre",
+        "du": "fährst",
+        "er/sie/es": "fährt",
+        "wir": "fahren",
+        "ihr": "fahrt",
+        "sie/Sie": "fahren"
+      },
+      "praeteritum": {
+        "ich": "fuhr",
+        "du": "fuhrst",
+        "er/sie/es": "fuhr",
+        "wir": "fuhren",
+        "ihr": "fuhrt",
+        "sie/Sie": "fuhren"
+      },
+      "perfekt": {
+        "ich": "habe gefahren",
+        "du": "hast gefahren",
+        "er/sie/es": "hat gefahren",
+        "wir": "haben gefahren",
+        "ihr": "habt gefahren",
+        "sie/Sie": "haben gefahren"
+      },
+      "konjunktiv2": {
+        "ich": "führe",
+        "du": "führest",
+        "er/sie/es": "führe",
+        "wir": "führen",
+        "ihr": "führet",
+        "sie/Sie": "führen"
+      }
+    }
   }
 }
