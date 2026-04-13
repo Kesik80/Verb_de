@@ -1,4 +1,50 @@
 {
+  "aufstehen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "встать, вставать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/aufstehen_ist.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/aufstehen_ist.mp3",
+    "hauptformen": {
+      "text": "steht auf · stand auf · ist aufgestanden",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/aufstehen_ist.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "stehe auf",
+        "du": "stehst auf",
+        "er/sie/es": "steht auf",
+        "wir": "stehen auf",
+        "ihr": "steht auf",
+        "sie/Sie": "stehen auf"
+      },
+      "praeteritum": {
+        "ich": "stand auf",
+        "du": "standest auf",
+        "er/sie/es": "stand auf",
+        "wir": "standen auf",
+        "ihr": "standet auf",
+        "sie/Sie": "standen auf"
+      },
+      "perfekt": {
+        "ich": "bin aufgestanden",
+        "du": "bist aufgestanden",
+        "er/sie/es": "ist aufgestanden",
+        "wir": "sind aufgestanden",
+        "ihr": "seid aufgestanden",
+        "sie/Sie": "sind aufgestanden"
+      },
+      "konjunktiv2": {
+        "ich": "stünde auf",
+        "du": "stündest auf",
+        "er/sie/es": "stünde auf",
+        "wir": "stünden auf",
+        "ihr": "stündet auf",
+        "sie/Sie": "stünden auf"
+      }
+    }
+  },
   "einladen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
