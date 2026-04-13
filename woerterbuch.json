@@ -787,5 +787,52 @@
         "sie/Sie": "äßen"
       }
     }
+  },
+  "waschen": {
+    "addedAt": "2026-04-13T21:39:11.384Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "мыть, стирать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/waschen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/waschen.mp3",
+    "hauptformen": {
+      "text": "wäscht · wusch · hat gewaschen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/waschen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "wasche",
+        "du": "wäschst",
+        "er/sie/es": "wäscht",
+        "wir": "waschen",
+        "ihr": "wascht",
+        "sie/Sie": "waschen"
+      },
+      "praeteritum": {
+        "ich": "wusch",
+        "du": "wuschst",
+        "er/sie/es": "wusch",
+        "wir": "wuschen",
+        "ihr": "wuscht",
+        "sie/Sie": "wuschen"
+      },
+      "perfekt": {
+        "ich": "habe gewaschen",
+        "du": "hast gewaschen",
+        "er/sie/es": "hat gewaschen",
+        "wir": "haben gewaschen",
+        "ihr": "habt gewaschen",
+        "sie/Sie": "haben gewaschen"
+      },
+      "konjunktiv2": {
+        "ich": "wüsche",
+        "du": "wüschest",
+        "er/sie/es": "wüsche",
+        "wir": "wüschen",
+        "ihr": "wüschet",
+        "sie/Sie": "wüschen"
+      }
+    }
   }
 }
