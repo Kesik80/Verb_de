@@ -320,5 +320,51 @@
         "sie/Sie": "sprächen"
       }
     }
+  },
+  "aufwachen": {
+    "niveau": "B1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "просыпаться, пробуждаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/aufwachen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3",
+    "hauptformen": {
+      "text": "wacht auf · wachte auf · ist aufgewacht",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "wache auf",
+        "du": "wachst auf",
+        "er/sie/es": "wacht auf",
+        "wir": "wachen auf",
+        "ihr": "wacht auf",
+        "sie/Sie": "wachen auf"
+      },
+      "praeteritum": {
+        "ich": "wachte auf",
+        "du": "wachtest auf",
+        "er/sie/es": "wachte auf",
+        "wir": "wachten auf",
+        "ihr": "wachtet auf",
+        "sie/Sie": "wachten auf"
+      },
+      "perfekt": {
+        "ich": "bin aufgewacht",
+        "du": "bist aufgewacht",
+        "er/sie/es": "ist aufgewacht",
+        "wir": "sind aufgewacht",
+        "ihr": "seid aufgewacht",
+        "sie/Sie": "sind aufgewacht"
+      },
+      "konjunktiv2": {
+        "ich": "wachte auf",
+        "du": "wachtest auf",
+        "er/sie/es": "wachte auf",
+        "wir": "wachten auf",
+        "ihr": "wachtet auf",
+        "sie/Sie": "wachten auf"
+      }
+    }
   }
 }
