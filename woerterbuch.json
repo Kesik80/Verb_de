@@ -1,4 +1,50 @@
 {
+  "einladen": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "пригласить, приглашать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/einladen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/einladen.mp3",
+    "hauptformen": {
+      "text": "lädt ein · lud ein · hat eingeladen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/einladen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "lade ein",
+        "du": "lädst ein",
+        "er/sie/es": "lädt ein",
+        "wir": "laden ein",
+        "ihr": "ladet ein",
+        "sie/Sie": "laden ein"
+      },
+      "praeteritum": {
+        "ich": "lud ein",
+        "du": "ludest ein",
+        "er/sie/es": "lud ein",
+        "wir": "luden ein",
+        "ihr": "ludet ein",
+        "sie/Sie": "luden ein"
+      },
+      "perfekt": {
+        "ich": "habe eingeladen",
+        "du": "hast eingeladen",
+        "er/sie/es": "hat eingeladen",
+        "wir": "haben eingeladen",
+        "ihr": "habt eingeladen",
+        "sie/Sie": "haben eingeladen"
+      },
+      "konjunktiv2": {
+        "ich": "lüde ein",
+        "du": "lüdest ein",
+        "er/sie/es": "lüde ein",
+        "wir": "lüden ein",
+        "ihr": "lüdet ein",
+        "sie/Sie": "lüden ein"
+      }
+    }
+  },
   "gehen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
