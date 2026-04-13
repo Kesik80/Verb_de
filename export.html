@@ -228,30 +228,14 @@ let activeFilter = 'all';
 
 async function load() {
   try {
-    const token = localStorage.getItem('gh_token') || '';
-    const headers = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    // Use GitHub API to bypass cache
-    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
-    const res = await fetch(apiUrl, { headers: { ...headers, 'Accept': 'application/vnd.github+json' } });
-
-    if (!res.ok) {
-      // Fallback to raw with cache-bust
-      const raw = await fetch(
-        `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_FILE}?t=${Date.now()}`,
-        { cache: 'no-store' }
-      );
-      if (!raw.ok) throw new Error(`HTTP ${raw.status}`);
-      wbData = await raw.json();
-    } else {
-      const data = await res.json();
-      const bytes = Uint8Array.from(atob(data.content.replace(/\s/g,'')), c => c.charCodeAt(0));
-      wbData = JSON.parse(new TextDecoder().decode(bytes));
-    }
+    // raw.githubusercontent.com doesn't cache-bust well, use jsDelivr CDN which has purge API
+    // or just use Vercel API proxy
+    const res = await fetch(`/api/wb?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    wbData = await res.json();
     render();
   } catch(e) {
-    document.getElementById('statsCard').innerHTML = `<div class="error">Ошибка загрузки: ${e.message}<br><small>Убедись что woerterbuch.json есть в репо</small></div>`;
+    document.getElementById('statsCard').innerHTML = `<div class="error">Ошибка загрузки: ${e.message}<br><small>${e.stack||''}</small></div>`;
   }
 }
 
