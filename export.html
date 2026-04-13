@@ -128,7 +128,7 @@
 
   .verb-row {
     display: grid;
-    grid-template-columns: 120px 80px 80px 1fr;
+    grid-template-columns: 110px 40px 45px 1fr 52px;
     padding: 7px 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     font-size: 12px;
@@ -215,6 +215,7 @@
 <div class="card" id="listCard" style="display:none">
   <h2>Словарь <span id="countBadge" style="color:var(--accent)"></span></h2>
   <div class="filter-row" id="filterRow"></div>
+  <div class="filter-row" id="sortRow"></div>
   <div class="verb-list" id="verbList"></div>
 </div>
 
@@ -225,6 +226,7 @@ const GH_FILE  = 'woerterbuch.json';
 const PRONOUNS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
 let wbData = {};
 let activeFilter = 'all';
+let activeSort = 'date'; // 'date' | 'niveau' | 'alpha'
 
 async function load() {
   try {
@@ -258,7 +260,7 @@ function render() {
   document.getElementById('exportCard').style.display = '';
   document.getElementById('listCard').style.display = '';
 
-  // Filters
+  // Filter chips
   const niveaux = ['all', ...new Set(verbs.map(([,v]) => v.niveau).filter(Boolean).sort())];
   document.getElementById('filterRow').innerHTML = niveaux.map(n => `
     <div class="filter-chip ${n === activeFilter ? 'active' : ''}" onclick="setFilter('${n}')">
@@ -266,21 +268,49 @@ function render() {
     </div>
   `).join('');
 
-  // List
-  const filtered = activeFilter === 'all' ? verbs : verbs.filter(([,v]) => v.niveau === activeFilter);
+  // Sort chips
+  document.getElementById('sortRow').innerHTML = [
+    ['date',   '🕐 По дате'],
+    ['niveau', '📊 По уровню'],
+    ['alpha',  '🔤 По алфавиту'],
+  ].map(([k,l]) => `
+    <div class="filter-chip ${activeSort === k ? 'active' : ''}" onclick="setSort('${k}')">${l}</div>
+  `).join('');
+
+  // Filter
+  let filtered = activeFilter === 'all' ? [...verbs] : verbs.filter(([,v]) => v.niveau === activeFilter);
+
+  // Sort
+  filtered.sort(([a,av],[b,bv]) => {
+    if (activeSort === 'date')   return (av.addedAt||'').localeCompare(bv.addedAt||'');
+    if (activeSort === 'niveau') {
+      const order = ['A1','A2','B1','B2','C1','C2',''];
+      const ni = order.indexOf(av.niveau||'') - order.indexOf(bv.niveau||'');
+      return ni !== 0 ? ni : a.localeCompare(b,'de');
+    }
+    return a.localeCompare(b,'de');
+  });
+
   document.getElementById('countBadge').textContent = `(${filtered.length})`;
-  document.getElementById('verbList').innerHTML = filtered.map(([inf, v]) => `
-    <div class="verb-row">
+  document.getElementById('verbList').innerHTML = filtered.map(([inf, v]) => {
+    const date = v.addedAt ? new Date(v.addedAt).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '';
+    return `<div class="verb-row">
       <span class="verb-name">${inf}</span>
       <span class="verb-niveau">${v.niveau || '—'}</span>
       <span class="verb-typ">${v.typ === 'unregelmäßig' ? 'непр.' : v.typ === 'regelmäßig' ? 'пр.' : '—'}</span>
-      <span class="verb-bedeutung">${v.bedeutung || '—'}</span>
-    </div>
-  `).join('');
+      <span class="verb-bedeutung" title="${v.bedeutung||''}">${v.bedeutung || '—'}</span>
+      <span style="font-size:9px;color:var(--border);white-space:nowrap">${date}</span>
+    </div>`;
+  }).join('');
 }
 
 function setFilter(f) {
   activeFilter = f;
+  render();
+}
+
+function setSort(s) {
+  activeSort = s;
   render();
 }
 
