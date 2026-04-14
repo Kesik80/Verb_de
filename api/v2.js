@@ -30,6 +30,18 @@ hits.push(ctx);
 }
 return res.status(200).json(hits);
 }
+if (req.query.debug === 'vtype') {
+// Find all occurrences of правил with surrounding context
+const hits = [];
+const re = /правил/gi;
+let m;
+while ((m = re.exec(html)) !== null && hits.length < 20) {
+const ctx = html.slice(Math.max(0,m.index-120), m.index+80)
+.replace(/\s+/g,' ').trim();
+hits.push(ctx);
+}
+return res.status(200).json({ total_hits: hits.length, hits });
+}
 try {
 return res.status(200).json(parse(html, verb));
 } catch (e) {
@@ -140,8 +152,16 @@ break;
 }
 const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
 const niveau = niveauM ? niveauM[1] : '';
-const unregelmaessig = /\u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html);
-const regelmaessig = /(?<!\u043d\u0435)\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html) && !unregelmaessig;
+// Most reliable source: <p class="rInf"> block which contains "C2 · правильный · haben"
+// This is the verb card badge — exactly what we need, no false positives
+const rInfMatch = html.match(/<p[^>]*class="[^"]*rInf[^"]*"[^>]*>([\s\S]{0,300}?)<\/p>/i);
+const rInfText = rInfMatch ? rInfMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+// Fallback: paragraph just after <h1> (contains "Спряжение глагола X правильное/неправильное")
+const h1ParaMatch = html.match(/<h1[^>]*>[\s\S]{0,200}<\/h1>\s*<p>([\s\S]{0,400}?)<\/p>/i);
+const h1ParaText = h1ParaMatch ? h1ParaMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+const searchIn = rInfText + ' ' + h1ParaText;
+const unregelmaessig = /неправильн/i.test(searchIn);
+const regelmaessig = !unregelmaessig && /правильн/i.test(searchIn);
 const verbType = unregelmaessig ? 'unregelm\xe4\xdfig' : (regelmaessig ? 'regelm\xe4\xdfig' : '');
 let hilfsverb = 'haben';
 const tenseConfig = [
