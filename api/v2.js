@@ -48,24 +48,24 @@ function strip(s) {
     .replace(/·/g,'·').replace(/\s+/g,' ').trim();
 }
 function formatCell(h) {
-  return h
-    .replace(/<u>(.*?)<\/u><\/b>/g,' $1 ')
-    .replace(/<u>(.*?)<\/u><\/i><\/b>/g,' $1 ')
-    .replace(/<u>(.*?)<\/u>/g,' $1 ')
-    .replace(/<b>(.*?)<\/b>/g,' $1 ')
-    .replace(/<i>(.*?)<\/i>/g,' $1 ')
-    .replace(/<[^>]+>/g,'')
-    .replace(/&nbsp;/g,' ').replace(/ &/g,' &').replace(/­/g,'')
-    .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-    // Remove alternative forms after slash: "wurde/ward⁶ " → "wurde "
-    .replace(/\/[^\s,]+/g, '')
-    // Remove footnote superscripts: ⁵ ⁶ etc
-    .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-    // Remove parentheses, keep content: sprech(e) → spreche
-    .replace(/\(([^)]*)\)/g, '$1')
-    // Fix spaces: "gehe n" -> "gehen"
-    .replace(/\s+([a-z])/g, ' $1')
-    .replace(/\s+/g, ' ').trim();
+return h
+.replace(/ (. ?) <\/u><\/b>/g,' $1 ')
+.replace(/ (. ?) <\/u><\/i><\/b>/g,' $1 ')
+.replace(/ (. ?) <\/u>/g,' $1 ')
+.replace(/ (. ?) <\/b>/g,' $1 ')
+.replace(/ (.*?)<\/i>/g,' $1 ')
+.replace(/<[^>]+>/g,'')
+.replace(/&nbsp;/g,' ').replace(/ &/g,' &').replace(/­/g,'')
+.replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
+// Remove alternative forms after slash: "wurde/ward⁶ " → "wurde "
+.replace(/\/[^\s,]+/g, '')
+// Remove footnote superscripts: ⁵ ⁶ etc
+.replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
+// Remove parentheses with optional letter: sprech(e) → spreche
+.replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
+// Remove spaces between letters that were split by parentheses removal
+.replace(/(\w)\s+(\w)/g, '$1$2')
+.replace(/\s+/g, ' ').trim();
 }
 
 function findTableAfterMp3(html, mp3key) {
