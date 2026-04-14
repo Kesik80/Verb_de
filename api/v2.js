@@ -52,7 +52,7 @@ return h
 .replace(/ &#(\d+);/g,(_,c)=>String.fromCharCode(+c))
 .replace(/\/[^\s,]+/g, '')
 .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-.replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
+.replace(/\(\s*([a-z\u00e4\u00f6\u00fc\u00df]*)\s*\)/g, '$1')
 .replace(/\s+/g, ' ').trim();
 }
 function findTableAfterMp3(html, mp3key) {
