@@ -48,24 +48,22 @@ function strip(s) {
     .replace(/·/g,'·').replace(/\s+/g,' ').trim();
 }
 function formatCell(h) {
-return h
-.replace(/ (. ?) <\/u><\/b>/g,' $1 ')
-.replace(/ (. ?) <\/u><\/i><\/b>/g,' $1 ')
-.replace(/ (. ?) <\/u>/g,' $1 ')
-.replace(/ (. ?) <\/b>/g,' $1 ')
-.replace(/ (.*?)<\/i>/g,' $1 ')
-.replace(/<[^>]+>/g,'')
-.replace(/&nbsp;/g,' ').replace(/ &/g,' &').replace(/­/g,'')
-.replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-// Remove alternative forms after slash: "wurde/ward⁶ " → "wurde "
-.replace(/\/[^\s,]+/g, '')
-// Remove footnote superscripts: ⁵ ⁶ etc
-.replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-// Remove parentheses with optional letter: sprech(e) → spreche
-.replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
-// Remove spaces between letters that were split by parentheses removal
-.replace(/(\w)\s+(\w)/g, '$1$2')
-.replace(/\s+/g, ' ').trim();
+  return h
+    .replace(/<u>(.*?)<\/u><\/b>/g,' $1 ')
+    .replace(/<u>(.*?)<\/u><\/i><\/b>/g,' $1 ')
+    .replace(/<u>(.*?)<\/u>/g,' $1 ')
+    .replace(/<b>(.*?)<\/b>/g,' $1 ')
+    .replace(/<i>(.*?)<\/i>/g,' $1 ')
+    .replace(/<[^>]+>/g,'')
+    .replace(/&nbsp;/g,' ').replace(/ &/g,' &').replace(/­/g,'')
+    .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
+    .replace(/\/[^\s,]+/g, '')
+    .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
+    // Убираем скобки с опциональной буквой: sprech(e) → spreche
+    .replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
+    // Убираем лишние пробелы между буквами
+    .replace(/(\w)\s+(\w)/g, '$1$2')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function findTableAfterMp3(html, mp3key) {
@@ -96,10 +94,10 @@ function findMp3(html, segment) {
       const url = html.slice(hrefStart + 6, urlEnd);
       if (url.endsWith('.mp3')) result = url;
     }
-    pos = idx + 1;  }
+    pos = idx + 1;
+  }
   return result;
 }
-
 const SLOT_KEYS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
 
 function parseConjTable(tableHtml) {
@@ -145,11 +143,11 @@ function parse(html, word) {
   const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung  let bedeutung = '';
+  // Bedeutung
+  let bedeutung = '';
   const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств|претеритум|конъюнктив|императив|перфект|плюсквам|футурум|инфинитив|партицип|упражне|грамматик|правила|переводы|значения|примеры|речевой вывод/i;
   const pronM = html.match(/\/[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː.]+\//);
-  if (pronM) {
-    const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
+  if (pronM) {    const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
     const cyrBlocks = [...chunk.matchAll(/[а-яёА-ЯЁ][а-яёА-ЯЁ\s,-.]{8,150}/g)];
     for (const b of [...cyrBlocks].reverse()) {
       const t = b[0].trim().replace(/[,\s]+$/, '');
@@ -163,6 +161,13 @@ function parse(html, word) {
   // Niveau
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   const niveau = niveauM ? niveauM[1] : '';
+
+  // Verb type — алгоритмическое определение по формам
+  const p3 = '';
+  const pt3 = '';
+  const pf3 = '';
+  
+  let verbType = '';
   let hilfsverb = 'haben';
 
   // Tenses
@@ -189,16 +194,15 @@ function parse(html, word) {
   }
 
   // Hauptformen
-  const p3 = strip(tenses.praesens?.['er/sie/es'] || '');
-  const pt3 = strip(tenses.praeteritum?.['er/sie/es'] || '');
-  const pf3 = strip(tenses.perfekt?.['er/sie/es'] || '');
-  const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
-  const hauptformen = { praesens_3sg: p3, praeteritum_3sg: pt3, partizip2: pf3 };
-  // === Verb type — алгоритмическое определение ===
-  const pt3Clean = (pt3 || '').toLowerCase().replace(/\s+/g,'');
-  const pf3Clean = (pf3 || '').toLowerCase().replace(/\s+/g,'').replace(/^(ist|bin|hast|hat|seid|sind)\s*/,'');
+  const p3_final = strip(tenses.praesens?.['er/sie/es'] || '');
+  const pt3_final = strip(tenses.praeteritum?.['er/sie/es'] || '');
+  const pf3_final = strip(tenses.perfekt?.['er/sie/es'] || '');  const rInfStr = [p3_final, pt3_final, pf3_final].filter(Boolean).join(' · ');
+  const hauptformen = { praesens_3sg: p3_final, praeteritum_3sg: pt3_final, partizip2: pf3_final };
+
+  // Определяем тип глагола по формам
+  const pt3Clean = (pt3_final || '').toLowerCase().replace(/\s+/g,'');
+  const pf3Clean = (pf3_final || '').toLowerCase().replace(/\s+/g,'').replace(/^(ist|bin|hast|hat|seid|sind)\s*/,'');
   
-  let verbType = '';
   if (pt3Clean && pf3Clean) {
     const endsInTe = pt3Clean.endsWith('te');
     const endsInT = pf3Clean.endsWith('t');
@@ -241,9 +245,9 @@ function parse(html, word) {
     if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
   }
 
-  // MP3 URLs
-  const mp3s = {};
-  const mp3Segs = {    praesens: 'indikativ/praesens/',
+  // MP3 URLs  const mp3s = {};
+  const mp3Segs = {
+    praesens: 'indikativ/praesens/',
     praeteritum: 'indikativ/praeteritum/',
     perfekt: 'indikativ/perfekt/',
     konjunktiv2: 'konjunktiv/praeteritum/',
