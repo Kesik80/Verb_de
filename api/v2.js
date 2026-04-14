@@ -1,5 +1,8 @@
 module.exports = async function handler(req, res) {
+  // Разрешаем запросы с любых доменов (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   const { w } = req.query;
   if (!w) return res.status(400).json({ error: 'w required' });
   
@@ -8,6 +11,7 @@ module.exports = async function handler(req, res) {
   
   let html;
   try {
+    // Загружаем страницу с заголовками, чтобы нас не блокировали
     const r = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
@@ -22,6 +26,7 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: e.message });
   }
 
+  // Режим отладки (возвращает сырой текст)
   if (req.query.debug === 'tr') {
     const hits = [];
     const re = /([\u0410-\u042f\u0430-\u044f\u0401\u0451].{10,80})/g;
@@ -42,26 +47,34 @@ module.exports = async function handler(req, res) {
   }
 };
 
-function strip(s) {
+// Очистка HTML тегов и спецсимволовfunction strip(s) {
   return s.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&/g,'&')
     .replace(/­/g,'').replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
     .replace(/·/g,'·').replace(/\s+/g,' ').trim();
 }
+
+// Форматирование ячейки таблицы (УДАЛЕНИЕ СКОБОК И ЛИШНИХ ПРОБЕЛОВ)
 function formatCell(h) {
   return h
+    // 1. Убираем HTML теги выделения
     .replace(/<u>(.*?)<\/u><\/b>/g,' $1 ')
     .replace(/<u>(.*?)<\/u><\/i><\/b>/g,' $1 ')
     .replace(/<u>(.*?)<\/u>/g,' $1 ')
     .replace(/<b>(.*?)<\/b>/g,' $1 ')
     .replace(/<i>(.*?)<\/i>/g,' $1 ')
     .replace(/<[^>]+>/g,'')
+    // 2. Нормализация пробелов и символов
     .replace(/&nbsp;/g,' ').replace(/ &/g,' &').replace(/­/g,'')
     .replace(/&#(\d+);/g,(_,c)=>String.fromCharCode(+c))
+    // 3. Убираем сноски и варианты через слэш
     .replace(/\/[^\s,]+/g, '')
     .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-    // Убираем скобки с опциональной буквой: sprech(e) → spreche
-    .replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
-    // Убираем лишние пробелы между буквами
+    // 4. ГЛАВНОЕ ИСПРАВЛЕНИЕ: Убираем скобки с буквой внутри: geh(e) -> gehe
+    .replace(/\(([a-zäöüß]?)\)/gi, '$1')
+    // 5. ГЛАВНОЕ ИСПРАВЛЕНИЕ: Убираем пробел перед окончанием: gehe n -> gehen, gehe t -> geht
+    // Ищет пробел, за которым идут 1-2 буквы (окончание) в конце строки
+    .replace(/\s+([a-zäöüß]{1,2})$/gi, '$1')
+    // Убираем разрывы внутри корня, если они остались (ge g ang en -> gegangen)
     .replace(/(\w)\s+(\w)/g, '$1$2')
     .replace(/\s+/g, ' ').trim();
 }
@@ -83,8 +96,7 @@ function findTableAfterMp3(html, mp3key) {
 }
 
 function findMp3(html, segment) {
-  let result = null;
-  let pos = 0;
+  let result = null;  let pos = 0;
   while (true) {
     const idx = html.indexOf(segment, pos);
     if (idx === -1) break;
@@ -98,6 +110,7 @@ function findMp3(html, segment) {
   }
   return result;
 }
+
 const SLOT_KEYS = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
 
 function parseConjTable(tableHtml) {
@@ -132,22 +145,22 @@ function parseConjTable(tableHtml) {
         : formatCell(rawCells[1]);
       dataRows.push([pronoun, form.trim()]);
     }
-  }
-  dataRows.slice(0,6).forEach((cells,i) => { result[SLOT_KEYS[i]] = cells[1]; });
+  }  dataRows.slice(0,6).forEach((cells,i) => { result[SLOT_KEYS[i]] = cells[1]; });
   return result;
 }
 
 function parse(html, word) {
-  // Infinitiv
+  // 1. Infinitiv
   let infinitiv = word;
-  const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
+  const infM = html.match(/class="[^"]*vInf[^"]*"[^>]*>\s*([a-zäöüß][a-zäöüß\s]{1,39}?)\s*</i);
   if (infM) infinitiv = infM[1].trim();
 
-  // Bedeutung
+  // 2. Bedeutung (Перевод)
   let bedeutung = '';
   const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств|претеритум|конъюнктив|императив|перфект|плюсквам|футурум|инфинитив|партицип|упражне|грамматик|правила|переводы|значения|примеры|речевой вывод/i;
   const pronM = html.match(/\/[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː.]+\//);
-  if (pronM) {    const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
+  if (pronM) {
+    const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
     const cyrBlocks = [...chunk.matchAll(/[а-яёА-ЯЁ][а-яёА-ЯЁ\s,-.]{8,150}/g)];
     for (const b of [...cyrBlocks].reverse()) {
       const t = b[0].trim().replace(/[,\s]+$/, '');
@@ -158,122 +171,13 @@ function parse(html, word) {
     }
   }
 
-  // Niveau
+  // 3. Niveau (Уровень)
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   const niveau = niveauM ? niveauM[1] : '';
 
-  // Verb type — алгоритмическое определение по формам
-  const p3 = '';
-  const pt3 = '';
-  const pf3 = '';
-  
-  let verbType = '';
-  let hilfsverb = 'haben';
-
-  // Tenses
+  // 4. Tenses (Времена)
   const tenseConfig = [
-    { key:'praesens', mp3:'indikativ/praesens/' },
-    { key:'praeteritum', mp3:'indikativ/praeteritum/' },
-    { key:'perfekt', mp3:'indikativ/perfekt/' },
-    { key:'plusquamperfekt', mp3:'indikativ/plusquamperfekt/' },
-    { key:'futur1', mp3:'indikativ/futur1/' },
-    { key:'konjunktiv2', mp3:'konjunktiv/praeteritum/' },
-  ];
-  const tenses = {};
-  for (const {key, mp3} of tenseConfig) {
-    const t = findTableAfterMp3(html, mp3);
-    if (t) {
-      const conj = parseConjTable(t);
-      if (Object.keys(conj).length >= 3) {
-        tenses[key] = conj;
-        if (key === 'perfekt' && conj['ich']) {
-          hilfsverb = /^bin\b/i.test(strip(conj['ich'])) ? 'sein' : 'haben';
-        }
-      }
-    }
-  }
-
-  // Hauptformen
-  const p3_final = strip(tenses.praesens?.['er/sie/es'] || '');
-  const pt3_final = strip(tenses.praeteritum?.['er/sie/es'] || '');
-  const pf3_final = strip(tenses.perfekt?.['er/sie/es'] || '');  const rInfStr = [p3_final, pt3_final, pf3_final].filter(Boolean).join(' · ');
-  const hauptformen = { praesens_3sg: p3_final, praeteritum_3sg: pt3_final, partizip2: pf3_final };
-
-  // Определяем тип глагола по формам
-  const pt3Clean = (pt3_final || '').toLowerCase().replace(/\s+/g,'');
-  const pf3Clean = (pf3_final || '').toLowerCase().replace(/\s+/g,'').replace(/^(ist|bin|hast|hat|seid|sind)\s*/,'');
-  
-  if (pt3Clean && pf3Clean) {
-    const endsInTe = pt3Clean.endsWith('te');
-    const endsInT = pf3Clean.endsWith('t');
-    verbType = (endsInTe && endsInT) ? 'regelmäßig' : 'unregelmäßig';
-  } else {
-    const htmlHead = html.slice(0, 6000);
-    const unreg = /(?:неправильн[ыйые]?\s+глагол|unregelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead);
-    const reg = /(?:правильн[ыйые]?\s+глагол|regelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead) && !unreg;
-    verbType = unreg ? 'unregelmäßig' : (reg ? 'regelmäßig' : '');
-  }
-
-  // Imperativ
-  const IMP_SLOTS = ['du','ihr','Sie'];
-  let imperativ = {};
-  const impT = findTableAfterMp3(html, '/imperativ/');
-  if (impT) {
-    const dataRows = [];
-    let pos = 0;
-    while (true) {
-      const rs = impT.indexOf('<tr', pos);
-      if (rs === -1) break;
-      const re = impT.indexOf('</tr>', rs);
-      if (re === -1) break;
-      const cells = [];
-      let cp = 0;
-      const rowHtml = impT.slice(rs, re);
-      while (true) {
-        const td = rowHtml.indexOf('<td', cp);
-        if (td === -1) break;
-        const tde = rowHtml.indexOf('</td>', td);
-        if (tde === -1) break;
-        cells.push(strip(rowHtml.slice(td, tde)));
-        cp = tde + 5;
-      }
-      if (cells.length === 2) dataRows.push(cells);
-      pos = re + 5;
-    }
-    if (dataRows[0]) imperativ['du'] = dataRows[0][1];
-    if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
-    if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
-  }
-
-  // MP3 URLs  const mp3s = {};
-  const mp3Segs = {
-    praesens: 'indikativ/praesens/',
-    praeteritum: 'indikativ/praeteritum/',
-    perfekt: 'indikativ/perfekt/',
-    konjunktiv2: 'konjunktiv/praeteritum/',
-  };
-  for (const [key, seg] of Object.entries(mp3Segs)) {
-    const url = findMp3(html, seg);
-    if (url) mp3s[key] = url;
-  }
-  mp3s.infinitiv = findMp3(html, '/konjugation/infinitiv/') ||
-                   findMp3(html, 'konjugation/infinitiv1/') ||
-                   findMp3(html, 'konjugation/infinitiv2/') || '';
-  mp3s.stammformen = findMp3(html, 'konjugation/stammformen/') || '';
-
-  // Beispiele
-  const beispiele = [];
-  const bspRe = /class="[^"]*\bsp\b[^"]*"[^>]*>([\s\S]{5,300}?)<\/div/g;
-  let bm;
-  while ((bm = bspRe.exec(html)) !== null && beispiele.length < 3) {
-    const t = strip(bm[1]);
-    if (t.length > 5 && !beispiele.includes(t)) beispiele.push(t);
-  }
-
-  return {
-    infinitiv, rInfStr, hauptformen, bedeutung,
-    niveau, verbType, hilfsverb,
-    tenses, imperativ, beispiele, mp3s,
-    source: `https://www.verbformen.ru/sprjazhenie/${encodeURIComponent(word)}.htm`
-  };
-}
+    { key:'praesens',        mp3:'indikativ/praesens/' },
+    { key:'praeteritum',     mp3:'indikativ/praeteritum/' },
+    { key:'perfekt',         mp3:'indikativ/perfekt/' },
+    { key:'plusquam
