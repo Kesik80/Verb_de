@@ -177,23 +177,23 @@ const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' · ');
 const hauptformen = { praesens_3sg: p3, praeteritum_3sg: pt3, partizip2: pf3 };
 
 // === Verb type — алгоритмическое определение по формам ===
-// Правильные глаголы: Präteritum на -te И Partizip II на ge-...-t
-const pt3Clean = (pt3 || '').toLowerCase().replace(/\s+/g,'');
-const pf3Clean = (pf3 || '').toLowerCase().replace(/\s+/g,'').replace(/^(ist|bin|hast|hat|seid|sind)\s*/,'');
-
-let verbType = '';
-if (pt3Clean || pf3Clean) {
-const endsInTe = pt3Clean.endsWith('te');
-const isGeT = /^ge.*t$/.test(pf3Clean);
-verbType = (endsInTe && isGeT) ? 'regelmäßig' : 'unregelmäßig';
-} else {
-// Фоллбэк: поиск в HTML если формы не извлеклись
-const htmlHead = html.slice(0, 8000);
-const unreg = /(?:неправильн[ыйые]?\s+глагол|unregelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead);
-const reg = /(?:правильн[ыйые]?\s+глагол|regelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead) && !unreg;
-verbType = unreg ? 'unregelmäßig' : (reg ? 'regelmäßig' : '');
-}
-// ===========================================================
+    const pt3Clean = (pt3 || '').toLowerCase().replace(/\s+/g,'');
+    const pf3Clean = (pf3 || '').toLowerCase().replace(/\s+/g,'').replace(/^(ist|bin|hast|hat|seid|sind)\s*/,'');
+    
+    let verbType = '';
+    if (pt3Clean && pf3Clean) {
+        // Правильный глагол: Präteritum на -te И Partizip II заканчивается на -t
+        const endsInTe = pt3Clean.endsWith('te');
+        const endsInT = pf3Clean.endsWith('t');
+        verbType = (endsInTe && endsInT) ? 'regelmäßig' : 'unregelmäßig';
+    } else {
+        // Фоллбэк: поиск в HTML только в верхней части страницы
+        const htmlHead = html.slice(0, 6000);
+        const unreg = /(?:неправильн[ыйые]?\s+глагол|unregelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead);
+        const reg = /(?:правильн[ыйые]?\s+глагол|regelmä(?:ß|ss)iges?\s+verb)/i.test(htmlHead) && !unreg;
+        verbType = unreg ? 'unregelmäßig' : (reg ? 'regelmäßig' : '');
+    }
+    // ===========================================================
 // Imperativ
 const IMP_SLOTS = ['du','ihr','Sie'];
 let imperativ = {};
