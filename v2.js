@@ -199,12 +199,20 @@ function parse(html, word) {
     }
   }
 
-  // Fallback verbType from Partizip II: ge...t = regelmaessig, ge...en = unregelmaessig
+  // Fallback verbType from Partizip II
+  // Regular: ge...t OR verb with inseparable prefix ending in -t (überlegt, besucht)
+  // Irregular: ge...en OR irregular stem change
   if (!unregelmaessig && !regelmaessig) {
     const p2 = strip(tenses.perfekt?.['er/sie/es'] || '').split(' ').pop();
     if (p2.length > 2) {
-      regelmaessig = p2.endsWith('t');
-      unregelmaessig = p2.endsWith('en');
+      // Inseparable prefixes — Partizip has no ge-
+      const insepPrefixes = /^(über|be|er|ver|ent|emp|miss|zer|ge|durch|um|unter|wider|hinter)/i;
+      if (p2.endsWith('t')) {
+        regelmaessig = true;  // ends in -t → regular (gemacht, überlegt, besucht)
+      } else if (p2.endsWith('en')) {
+        // Could still be regular if stem unchanged, but mostly irregular
+        unregelmaessig = true;
+      }
     }
   }
   const verbType = unregelmaessig ? 'unregelm\xe4\xdfig' : (regelmaessig ? 'regelm\xe4\xdfig' : '');
