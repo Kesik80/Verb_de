@@ -164,12 +164,11 @@ function parse(html, word) {
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   const niveau = niveauM ? niveauM[1] : '';
 
-// Verb type
-    const htmlHead = html.slice(0, 3500); // Проверяем только верхнюю часть страницы
-    const unregelmaessig = /(?:неправильный|unregelmäßig|starkes?\s+verb)/i.test(htmlHead);
-    const regelmaessig = /(?:правильный|regelmäßig|schwaches?\s+verb)/i.test(htmlHead) && !unregelmaessig;
+// Verb type — проверяем только заголовок и верхнюю часть страницы
+    const htmlHead = html.slice(0, 4000); // Тип глагола всегда в <h1> или мета-информации
+    const unregelmaessig = /(?:неправильный|unregelmäßig|starkes\s+verb)/i.test(htmlHead);
+    const regelmaessig = /(?:правильный|regelmäßig|schwaches\s+verb)/i.test(htmlHead) && !unregelmaessig;
     const verbType = unregelmaessig ? 'unregelmäßig' : (regelmaessig ? 'regelmäßig' : '');
-  let hilfsverb = 'haben';
 
   // Tenses
   const tenseConfig = [
