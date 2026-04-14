@@ -47,16 +47,19 @@ return h
 .replace(/ (. ?) <\/u><\/b>/g,' $1 ')
 .replace(/ (. ?) <\/u><\/i><\/b>/g,' $1 ')
 .replace(/ (. ?) <\/u>/g,' $1 ')
-.replace(/ (. ?) <\/b>/g,' $1 ').replace(/ (.*?)<\/i>/g,' $1 ')
+.replace(/ (. ?) <\/b>/g,' $1 ')
+.replace(/ (.*?)<\/i>/g,' $1 ')
 .replace(/<[^>]+>/g,'')
 .replace(/ /g,' ').replace(/ &/g,' &').replace(/­/g,'')
 .replace(/ &#(\d+);/g,(_,c)=>String.fromCharCode(+c))
 // Remove alternative forms after slash: "wurde/ward⁶ " → "wurde "
-.replace(/\/[^\s,]+/g, '')
+.replace(//[^\s,]+/g, '')
 // Remove footnote superscripts: ⁵ ⁶ etc
 .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
 // Remove parentheses, keep content: sprech(e) → spreche, hab(e) → habe
 .replace(/\(([^)]*)\)/g, '$1')
+// Убираем лишние пробелы перед буквами (после удаления скобок)
+.replace(/\s+([a-z])/g, ' $1')
 .replace(/\s+/g, ' ').trim();
 }
 function findTableAfterMp3(html, mp3key) {
