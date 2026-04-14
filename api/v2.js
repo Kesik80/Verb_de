@@ -164,10 +164,15 @@ function parse(html, word) {
   const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   const niveau = niveauM ? niveauM[1] : '';
 
-// Verb type — проверяем только заголовок и верхнюю часть страницы
-    const htmlHead = html.slice(0, 4000); // Тип глагола всегда в <h1> или мета-информации
-    const unregelmaessig = /(?:неправильный|unregelmäßig|starkes\s+verb)/i.test(htmlHead);
-    const regelmaessig = /(?:правильный|regelmäßig|schwaches\s+verb)/i.test(htmlHead) && !unregelmaessig;
+// Verb type — ищем только в начале страницы (заголовок + описание)
+    const htmlHead = html.slice(0, 5000); // Первые 5KB — заголовок, описание, уровень
+    
+    // Ищем конкретные фразы в контексте
+    const unregPattern = /(?:спряжение.*?неправильное|неправильный.*?verb|unregelmäßig)/i;
+    const regPattern = /(?:спряжение.*?правильное|правильный.*?verb|regelmäßig)/i;
+    
+    const unregelmaessig = unregPattern.test(htmlHead);
+    const regelmaessig = regPattern.test(htmlHead) && !unregelmaessig;
     const verbType = unregelmaessig ? 'unregelmäßig' : (regelmaessig ? 'regelmäßig' : '');
 
   // Tenses
