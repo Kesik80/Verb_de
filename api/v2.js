@@ -54,26 +54,20 @@ function strip(s) {
 
 function formatCell(h) {
   return h
-    // 1. Убираем теги выделения
     .replace(/<u>(.*?)<\/u><\/b>/g, ' $1 ')
     .replace(/<u>(.*?)<\/u><\/i><\/b>/g, ' $1 ')
     .replace(/<u>(.*?)<\/u>/g, ' $1 ')
     .replace(/<b>(.*?)<\/b>/g, ' $1 ')
     .replace(/<i>(.*?)<\/i>/g, ' $1 ')
     .replace(/<[^>]+>/g, '')
-    // 2. Нормализация символов
     .replace(/&nbsp;/g, ' ')
-    .replace(/ &/g, ' &')
-    .replace(/­/g, '')
     .replace(/&#(\d+);/g, (_, c) => String.fromCharCode(+c))
-    // 3. Убираем сноски и варианты через слэш
     .replace(/\/[^\s,]+/g, '')
     .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-    // 4. Убираем скобки с опциональной буквой: sprech(e) -> spreche
+    // Убираем скобки с буквой: sprech(e) -> spreche
     .replace(/\(([a-zäöüß]?)\)/gi, '$1')
-    // 5. Убираем пробелы, которые остались после скобок или разбиения слогов: geh e -> gehe, gehe n -> gehen
+    // Убираем пробелы между буквами: geg angen -> gegangen
     .replace(/(\w)\s+(\w)/g, '$1$2')
-    // 6. Финальная очистка пробелов
     .replace(/\s+/g, ' ')
     .trim();
 }
