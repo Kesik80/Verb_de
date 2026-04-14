@@ -50,7 +50,7 @@ return h
 .replace(/ (.*?)<\/i>/g,' $1 ').replace(/<[^>]+>/g,'')
 .replace(/ /g,' ').replace(/ &/g,' &').replace(/­/g,'')
 .replace(/ &#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-.replace(//[^\s,]+/g, '')
+.replace(/\/[^\s,]+/g, '')
 .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
 .replace(/\(([a-z\u00e4\u00f6\u00fc\u00df]?)\)/g, '$1')
 .replace(/\s+/g, ' ').trim();
@@ -63,7 +63,7 @@ const mp3pos = html.indexOf(mp3key, pos);
 if (mp3pos === -1) break;
 const ts = html.indexOf('<table', mp3pos);
 if (ts !== -1 && ts - mp3pos <= 500) {
-const te = html.indexOf('', ts);
+const te = html.indexOf('</table>', ts);
 if (te !== -1) result = html.slice(ts, te + 8);
 }
 pos = mp3pos + 1;
@@ -94,7 +94,7 @@ let pos = 0;
 while (true) {
 const rs = tableHtml.indexOf('<tr', pos);
 if (rs === -1) break;
-const re = tableHtml.indexOf('', rs);
+const re = tableHtml.indexOf('</tr>', rs);
 if (re === -1) break;
 const rowHtml = tableHtml.slice(rs, re);pos = re + 5;
 const rawCells = [];
@@ -102,7 +102,7 @@ let cp = 0;
 while (true) {
 const td = rowHtml.indexOf('<td', cp);
 if (td === -1) break;
-const tde = rowHtml.indexOf('', td);
+const tde = rowHtml.indexOf('</td>', td);
 if (tde === -1) break;
 const gtEnd = rowHtml.indexOf('>', td);
 rawCells.push(rowHtml.slice(gtEnd + 1, tde));
@@ -121,14 +121,12 @@ dataRows.slice(0,6).forEach((cells,i) => { result[SLOT_KEYS[i]] = cells[1]; });
 return result;
 }
 function parse(html, word) {
-// Infinitiv
 let infinitiv = word;
-const infM = html.match(/class="[^"]vInf[^"]"[^>]>\s([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
+const infM = html.match(/class="[^"]vInf[^"]"[^>]*>\s*([a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf][a-z\xc4\xe4\xd6\xf6\xdc\xfc\xdf\s]{1,39}?)\s*</i);
 if (infM) infinitiv = infM[1].trim();
-// Bedeutung
 let bedeutung = '';
 const skipRe = /реклам|сайт|баллов|войти|зарегистр|подписк|аккаунт|пользовател|набер|количеств|претеритум|конъюнктив|императив|перфект|плюсквам|футурум|инфинитив|партицип|упражне|грамматик|правила|переводы|значения|примеры|речевой вывод/i;
-const pronM = html.match(//[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː.]+//);
+const pronM = html.match(/\/[a-z\u0250-\u02ff\u00e6\u00f8\u0259\u026aː.]+\//);
 if (pronM) {
 const chunk = html.slice(Math.max(0, pronM.index - 1000), pronM.index);
 const cyrBlocks = [...chunk.matchAll(/[а-яёА-ЯЁ][а-яёА-ЯЁ\s,-.]{8,150}/g)];
@@ -140,17 +138,14 @@ break;
 }
 }
 }
-// Niveau
 const niveauM = html.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
 const niveau = niveauM ? niveauM[1] : '';
-// Verb type — ИСПРАВЛЕНО: сначала определяем тип, потом используем
 const unregelmaessig = /\u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html);
-const regelmaessig = /\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html) && !unregelmaessig;let verbType = unregelmaessig ? 'unregelm\xe4\xdfig' : (regelmaessig ? 'regelm\xe4\xdfig' : '');
+const regelmaessig = /\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d/i.test(html) && !unregelmaessig;
+const verbType = unregelmaessig ? 'unregelm\xe4\xdfig' : (regelmaessig ? 'regelm\xe4\xdfig' : '');
 let hilfsverb = 'haben';
-// Tenses
 const tenseConfig = [
-{ key:'praesens', mp3:'indikativ/praesens/' },
-{ key:'praeteritum', mp3:'indikativ/praeteritum/' },
+{ key:'praesens', mp3:'indikativ/praesens/' },{ key:'praeteritum', mp3:'indikativ/praeteritum/' },
 { key:'perfekt', mp3:'indikativ/perfekt/' },
 { key:'plusquamperfekt', mp3:'indikativ/plusquamperfekt/' },
 { key:'futur1', mp3:'indikativ/futur1/' },
@@ -169,13 +164,11 @@ hilfsverb = /^bin\b/i.test(strip(conj['ich'])) ? 'sein' : 'haben';
 }
 }
 }
-// Hauptformen — ИСПРАВЛЕНО: объявляем ПЕРЕД использованием
 const p3  = strip(tenses.praesens?.['er/sie/es'] || '');
 const pt3 = strip(tenses.praeteritum?.['er/sie/es'] || '');
 const pf3 = strip(tenses.perfekt?.['er/sie/es'] || '');
 const rInfStr = [p3, pt3, pf3].filter(Boolean).join(' \xb7 ');
 const hauptformen = { praesens_3sg: p3, praeteritum_3sg: pt3, partizip2: pf3 };
-// Imperativ
 const IMP_SLOTS = ['du','ihr','Sie'];
 let imperativ = {};
 const impT = findTableAfterMp3(html, '/imperativ/');
@@ -185,7 +178,7 @@ let pos = 0;
 while (true) {
 const rs = impT.indexOf('<tr', pos);
 if (rs === -1) break;
-const re = impT.indexOf('', rs);
+const re = impT.indexOf('</tr>', rs);
 if (re === -1) break;
 const cells = [];
 let cp = 0;
@@ -193,18 +186,17 @@ const rowHtml = impT.slice(rs, re);
 while (true) {
 const td = rowHtml.indexOf('<td', cp);
 if (td === -1) break;
-const tde = rowHtml.indexOf('', td);
-if (tde === -1) break;cells.push(strip(rowHtml.slice(td, tde)));
+const tde = rowHtml.indexOf('</td>', td);
+if (tde === -1) break;
+cells.push(strip(rowHtml.slice(td, tde)));
 cp = tde + 5;
 }
 if (cells.length === 2) dataRows.push(cells);
 pos = re + 5;
 }
-if (dataRows[0]) imperativ['du']  = dataRows[0][1];
-if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
+if (dataRows[0]) imperativ['du']  = dataRows[0][1];if (dataRows[2]) imperativ['ihr'] = dataRows[2][1];
 if (dataRows[3]) imperativ['Sie'] = dataRows[3][1];
 }
-// MP3 URLs
 const mp3s = {};
 const mp3Segs = {
 praesens:    'indikativ/praesens/',
@@ -220,9 +212,8 @@ mp3s.infinitiv = findMp3(html, '/konjugation/infinitiv/') ||
 findMp3(html, 'konjugation/infinitiv1/') ||
 findMp3(html, 'konjugation/infinitiv2/') || '';
 mp3s.stammformen = findMp3(html, 'konjugation/stammformen/') || '';
-// Beispiele
 const beispiele = [];
-const bspRe = /class="[^"]\bbsp\b[^"]"[^>]*>([\s\S]{5,300}?)<//g;
+const bspRe = /class="[^"]\bbsp\b[^"]"[^>]*>([\s\S]{5,300}?)<\/div/g;
 let bm;
 while ((bm = bspRe.exec(html)) !== null && beispiele.length < 3) {
 const t = strip(bm[1]);
