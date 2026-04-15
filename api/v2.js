@@ -54,18 +54,19 @@ return s.replace(/<[^>]+>/g,'').replace(/&/g,'&').replace(/ /g,' ')
 .replace(/·/g,'·').replace(/\s+/g,' ').trim();
 }
 function formatCell(h) {
-return h
-.replace(/ (. ?) <\/u><\/b>/g,' $1 ')
-.replace(/ (. ?) <\/u><\/i><\/b>/g,' $1 ')
-.replace(/ (. ?) <\/u>/g,' $1 ')
-.replace(/ (. ?) <\/b>/g,' $1 ')
-.replace(/ (.*?)<\/i>/g,' $1 ').replace(/<[^>]+>/g,'')
-.replace(/ /g,' ').replace(/ &/g,' &').replace(/­/g,'')
-.replace(/ &#(\d+);/g,(_,c)=>String.fromCharCode(+c))
-.replace(/\/[^\s,]+/g, '')
-.replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
-.replace(/\(\s*([a-z\u00e4\u00f6\u00fc\u00df]*)\s*\)/g, '$1')
-.replace(/\s+/g, ' ').trim();
+  // First remove all HTML tags WITHOUT adding spaces (syllables are split by tags)
+  return h
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&shy;/g, '')
+    .replace(/&middot;/g, '·')
+    .replace(/&#(\d+);/g, (_, c) => String.fromCharCode(+c))
+    // Remove alternative forms after slash
+    .replace(/\/[^\s,]+/g, '')
+    // Remove footnote superscripts
+    .replace(/[\u2070-\u2079\u00b9\u00b2\u00b3]+/g, '')
+    // Remove parentheses with optional spaces inside: (e ) → e
+    .replace(/\(\s*([a-z\u00e4\u00f6\u00fc\u00df]*)\s*\)/g, '$1')
+    .replace(/\s+/g, ' ').trim();
 }
 function findTableAfterMp3(html, mp3key) {
 let result = null;
@@ -123,9 +124,15 @@ cp = tde + 5;
 if (rawCells.length >= 2) {
 const pronoun = strip(rawCells[0]);
 if (!pronoun) continue;
-const form = rawCells.length >= 3
-? formatCell(rawCells[1]) + ' ' + formatCell(rawCells[2])
-: formatCell(rawCells[1]);
+let form;
+if (rawCells.length >= 3) {
+const p1 = formatCell(rawCells[1]);
+const p2 = formatCell(rawCells[2]);
+const isHelper = /^(bin|bist|ist|sind|seid|habe|hast|hat|haben|habt|werde|wirst|wird|werden|werdet|war|warst|waren|wart|hatte|hattest|hatten|hattet)$/i.test(p1.trim());
+form = isHelper ? p1 + ' ' + p2 : p1 + p2;
+} else {
+form = formatCell(rawCells[1]);
+}
 dataRows.push([pronoun, form.trim()]);
 }
 }
