@@ -276,6 +276,50 @@
       }
     }
   },
+  "bleiben": {
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "оставаться, пребывать",
+    "hauptformen": {
+      "text": "bleibt · blieb · ist geblieben"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "bleibe",
+        "du": "bleibst",
+        "er/sie/es": "bleibt",
+        "wir": "bleiben",
+        "ihr": "bleibt",
+        "sie/Sie": "bleiben"
+      },
+      "praeteritum": {
+        "ich": "blieb",
+        "du": "bliebst",
+        "er/sie/es": "blieb",
+        "wir": "blieben",
+        "ihr": "bliebt",
+        "sie/Sie": "blieben"
+      },
+      "perfekt": {
+        "ich": "bin geblieben",
+        "du": "bist geblieben",
+        "er/sie/es": "ist geblieben",
+        "wir": "sind geblieben",
+        "ihr": "seid geblieben",
+        "sie/Sie": "sind geblieben"
+      },
+      "konjunktiv2": {
+        "ich": "bliebe",
+        "du": "bliebest",
+        "er/sie/es": "bliebe",
+        "wir": "blieben",
+        "ihr": "bliebet",
+        "sie/Sie": "blieben"
+      }
+    },
+    "addedAt": "2026-09-11T18:09:20.719Z"
+  },
   "einkaufen": {
     "addedAt": "2026-04-13T21:04:52.661Z",
     "niveau": "A1",
