@@ -2,10 +2,19 @@
   "Maschine": {
     "artikel": "die",
     "plural": "die Maschinen",
-    "genitiv": "",
-    "bedeutung": "машина, аппарат, механизм",
+    "genitiv": "der Maschine",
+    "bedeutung": "машина, аппарат, станок",
     "niveau": "A2",
-    "beispiele": [],
-    "addedAt": "2026-09-11T18:43:40.185Z"
+    "beispiele": [
+      {
+        "de": "Die Maschine funktioniert nicht mehr.",
+        "ru": "Машина больше не работает."
+      },
+      {
+        "de": "Er repariert eine alte Maschine.",
+        "ru": "Он ремонтирует старый станок."
+      }
+    ],
+    "addedAt": "2026-09-11T19:01:32.906Z"
   }
 }
