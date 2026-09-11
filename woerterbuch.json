@@ -692,6 +692,50 @@
       }
     }
   },
+  "leidtun": {
+    "niveau": "B1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "сожалеть, огорчать, причинять боль",
+    "hauptformen": {
+      "text": "tut leid · tat leid · hat leidgetan"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "tue leid",
+        "du": "tust leid",
+        "er/sie/es": "tut leid",
+        "wir": "tun leid",
+        "ihr": "tut leid",
+        "sie/Sie": "tun leid"
+      },
+      "praeteritum": {
+        "ich": "tat leid",
+        "du": "tatest leid",
+        "er/sie/es": "tat leid",
+        "wir": "taten leid",
+        "ihr": "tatet leid",
+        "sie/Sie": "taten leid"
+      },
+      "perfekt": {
+        "ich": "habe leidgetan",
+        "du": "hast leidgetan",
+        "er/sie/es": "hat leidgetan",
+        "wir": "haben leidgetan",
+        "ihr": "habt leidgetan",
+        "sie/Sie": "haben leidgetan"
+      },
+      "konjunktiv2": {
+        "ich": "täte leid",
+        "du": "tätest leid",
+        "er/sie/es": "täte leid",
+        "wir": "täten leid",
+        "ihr": "tätet leid",
+        "sie/Sie": "täten leid"
+      }
+    },
+    "addedAt": "2026-09-11T19:04:58.345Z"
+  },
   "lesen": {
     "addedAt": "2026-04-13T21:40:44.358Z",
     "niveau": "A1",
