@@ -1,4 +1,95 @@
 {
+  "abholen": {
+    "niveau": "A1",
+    "typ": "regelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "забирать, встречать, заходить",
+    "hauptformen": {
+      "text": "holt ab · holte ab · hat abgeholt"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "hole ab",
+        "du": "holst ab",
+        "er/sie/es": "holt ab",
+        "wir": "holen ab",
+        "ihr": "holt ab",
+        "sie/Sie": "holen ab"
+      },
+      "praeteritum": {
+        "ich": "holte ab",
+        "du": "holtest ab",
+        "er/sie/es": "holte ab",
+        "wir": "holten ab",
+        "ihr": "holtet ab",
+        "sie/Sie": "holten ab"
+      },
+      "perfekt": {
+        "ich": "habe abgeholt",
+        "du": "hast abgeholt",
+        "er/sie/es": "hat abgeholt",
+        "wir": "haben abgeholt",
+        "ihr": "habt abgeholt",
+        "sie/Sie": "haben abgeholt"
+      },
+      "konjunktiv2": {
+        "ich": "würde abholen",
+        "du": "würdest abholen",
+        "er/sie/es": "würde abholen",
+        "wir": "würden abholen",
+        "ihr": "würdet abholen",
+        "sie/Sie": "würden abholen"
+      }
+    },
+    "addedAt": "2026-09-11T09:40:17.789Z"
+  },
+  "anrufen": {
+    "addedAt": "2026-04-13T21:07:58.323Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "звонить, позвонить",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/anrufen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3",
+    "hauptformen": {
+      "text": "ruft an · rief an · hat angerufen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "rufe an",
+        "du": "rufst an",
+        "er/sie/es": "ruft an",
+        "wir": "rufen an",
+        "ihr": "ruft an",
+        "sie/Sie": "rufen an"
+      },
+      "praeteritum": {
+        "ich": "rief an",
+        "du": "riefst an",
+        "er/sie/es": "rief an",
+        "wir": "riefen an",
+        "ihr": "rieft an",
+        "sie/Sie": "riefen an"
+      },
+      "perfekt": {
+        "ich": "habe angerufen",
+        "du": "hast angerufen",
+        "er/sie/es": "hat angerufen",
+        "wir": "haben angerufen",
+        "ihr": "habt angerufen",
+        "sie/Sie": "haben angerufen"
+      },
+      "konjunktiv2": {
+        "ich": "riefe an",
+        "du": "riefest an",
+        "er/sie/es": "riefe an",
+        "wir": "riefen an",
+        "ihr": "riefet an",
+        "sie/Sie": "riefen an"
+      }
+    }
+  },
   "aufstehen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
@@ -45,6 +136,193 @@
       }
     }
   },
+  "aufwachen": {
+    "niveau": "B1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "просыпаться, пробуждаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/aufwachen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3",
+    "hauptformen": {
+      "text": "wacht auf · wachte auf · ist aufgewacht",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "wache auf",
+        "du": "wachst auf",
+        "er/sie/es": "wacht auf",
+        "wir": "wachen auf",
+        "ihr": "wacht auf",
+        "sie/Sie": "wachen auf"
+      },
+      "praeteritum": {
+        "ich": "wachte auf",
+        "du": "wachtest auf",
+        "er/sie/es": "wachte auf",
+        "wir": "wachten auf",
+        "ihr": "wachtet auf",
+        "sie/Sie": "wachten auf"
+      },
+      "perfekt": {
+        "ich": "bin aufgewacht",
+        "du": "bist aufgewacht",
+        "er/sie/es": "ist aufgewacht",
+        "wir": "sind aufgewacht",
+        "ihr": "seid aufgewacht",
+        "sie/Sie": "sind aufgewacht"
+      },
+      "konjunktiv2": {
+        "ich": "wachte auf",
+        "du": "wachtest auf",
+        "er/sie/es": "wachte auf",
+        "wir": "wachten auf",
+        "ihr": "wachtet auf",
+        "sie/Sie": "wachten auf"
+      }
+    }
+  },
+  "ausgehen": {
+    "addedAt": "2026-04-13T21:06:48.051Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "sein",
+    "bedeutung": "выходить, заканчиваться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausgehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3",
+    "hauptformen": {
+      "text": "geht aus · ging aus · ist ausgegangen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "gehe aus",
+        "du": "gehst aus",
+        "er/sie/es": "geht aus",
+        "wir": "gehen aus",
+        "ihr": "geht aus",
+        "sie/Sie": "gehen aus"
+      },
+      "praeteritum": {
+        "ich": "ging aus",
+        "du": "gingst aus",
+        "er/sie/es": "ging aus",
+        "wir": "gingen aus",
+        "ihr": "gingt aus",
+        "sie/Sie": "gingen aus"
+      },
+      "perfekt": {
+        "ich": "bin ausgegangen",
+        "du": "bist ausgegangen",
+        "er/sie/es": "ist ausgegangen",
+        "wir": "sind ausgegangen",
+        "ihr": "seid ausgegangen",
+        "sie/Sie": "sind ausgegangen"
+      },
+      "konjunktiv2": {
+        "ich": "ginge aus",
+        "du": "gingest aus",
+        "er/sie/es": "ginge aus",
+        "wir": "gingen aus",
+        "ihr": "ginget aus",
+        "sie/Sie": "gingen aus"
+      }
+    }
+  },
+  "ausschlafen": {
+    "addedAt": "2026-04-13T21:09:13.954Z",
+    "niveau": "A2",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "выспаться, высыпаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausschlafen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3",
+    "hauptformen": {
+      "text": "schläft aus · schlief aus · hat ausgeschlafen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "schlafe aus",
+        "du": "schläfst aus",
+        "er/sie/es": "schläft aus",
+        "wir": "schlafen aus",
+        "ihr": "schlaft aus",
+        "sie/Sie": "schlafen aus"
+      },
+      "praeteritum": {
+        "ich": "schlief aus",
+        "du": "schliefst aus",
+        "er/sie/es": "schlief aus",
+        "wir": "schliefen aus",
+        "ihr": "schlieft aus",
+        "sie/Sie": "schliefen aus"
+      },
+      "perfekt": {
+        "ich": "habe ausgeschlafen",
+        "du": "hast ausgeschlafen",
+        "er/sie/es": "hat ausgeschlafen",
+        "wir": "haben ausgeschlafen",
+        "ihr": "habt ausgeschlafen",
+        "sie/Sie": "haben ausgeschlafen"
+      },
+      "konjunktiv2": {
+        "ich": "schliefe aus",
+        "du": "schliefest aus",
+        "er/sie/es": "schliefe aus",
+        "wir": "schliefen aus",
+        "ihr": "schliefet aus",
+        "sie/Sie": "schliefen aus"
+      }
+    }
+  },
+  "einkaufen": {
+    "addedAt": "2026-04-13T21:04:52.661Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "покупать, делать покупки",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/einkaufen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3",
+    "hauptformen": {
+      "text": "kauft ein · kaufte ein · hat eingekauft",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "kaufe ein",
+        "du": "kaufst ein",
+        "er/sie/es": "kauft ein",
+        "wir": "kaufen ein",
+        "ihr": "kauft ein",
+        "sie/Sie": "kaufen ein"
+      },
+      "praeteritum": {
+        "ich": "kaufte ein",
+        "du": "kauftest ein",
+        "er/sie/es": "kaufte ein",
+        "wir": "kauften ein",
+        "ihr": "kauftet ein",
+        "sie/Sie": "kauften ein"
+      },
+      "perfekt": {
+        "ich": "habe eingekauft",
+        "du": "hast eingekauft",
+        "er/sie/es": "hat eingekauft",
+        "wir": "haben eingekauft",
+        "ihr": "habt eingekauft",
+        "sie/Sie": "haben eingekauft"
+      },
+      "konjunktiv2": {
+        "ich": "kaufte ein",
+        "du": "kauftest ein",
+        "er/sie/es": "kaufte ein",
+        "wir": "kauften ein",
+        "ihr": "kauftet ein",
+        "sie/Sie": "kauften ein"
+      }
+    }
+  },
   "einladen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
@@ -88,6 +366,147 @@
         "wir": "lüden ein",
         "ihr": "lüdet ein",
         "sie/Sie": "lüden ein"
+      }
+    }
+  },
+  "essen": {
+    "addedAt": "2026-04-13T21:37:19.429Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "есть, питаться",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/essen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3",
+    "hauptformen": {
+      "text": "isst · aß · hat gegessen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "esse",
+        "du": "isst",
+        "er/sie/es": "isst",
+        "wir": "essen",
+        "ihr": "esst",
+        "sie/Sie": "essen"
+      },
+      "praeteritum": {
+        "ich": "aß",
+        "du": "aßest",
+        "er/sie/es": "aß",
+        "wir": "aßen",
+        "ihr": "aßet",
+        "sie/Sie": "aßen"
+      },
+      "perfekt": {
+        "ich": "habe gegessen",
+        "du": "hast gegessen",
+        "er/sie/es": "hat gegessen",
+        "wir": "haben gegessen",
+        "ihr": "habt gegessen",
+        "sie/Sie": "haben gegessen"
+      },
+      "konjunktiv2": {
+        "ich": "äße",
+        "du": "äßest",
+        "er/sie/es": "äße",
+        "wir": "äßen",
+        "ihr": "äßet",
+        "sie/Sie": "äßen"
+      }
+    }
+  },
+  "fahren": {
+    "addedAt": "2026-04-13T21:36:58.158Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "водить, везти",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fahren_hat.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3",
+    "hauptformen": {
+      "text": "fährt · fuhr · hat gefahren",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "fahre",
+        "du": "fährst",
+        "er/sie/es": "fährt",
+        "wir": "fahren",
+        "ihr": "fahrt",
+        "sie/Sie": "fahren"
+      },
+      "praeteritum": {
+        "ich": "fuhr",
+        "du": "fuhrst",
+        "er/sie/es": "fuhr",
+        "wir": "fuhren",
+        "ihr": "fuhrt",
+        "sie/Sie": "fuhren"
+      },
+      "perfekt": {
+        "ich": "habe gefahren",
+        "du": "hast gefahren",
+        "er/sie/es": "hat gefahren",
+        "wir": "haben gefahren",
+        "ihr": "habt gefahren",
+        "sie/Sie": "haben gefahren"
+      },
+      "konjunktiv2": {
+        "ich": "führe",
+        "du": "führest",
+        "er/sie/es": "führe",
+        "wir": "führen",
+        "ihr": "führet",
+        "sie/Sie": "führen"
+      }
+    }
+  },
+  "fernsehen": {
+    "addedAt": "2026-04-13T21:05:52.773Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "посмотреть телевизор, смотреть",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fernsehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3",
+    "hauptformen": {
+      "text": "sieht fern · sah fern · hat ferngesehen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "sehe fern",
+        "du": "siehst fern",
+        "er/sie/es": "sieht fern",
+        "wir": "sehen fern",
+        "ihr": "seht fern",
+        "sie/Sie": "sehen fern"
+      },
+      "praeteritum": {
+        "ich": "sah fern",
+        "du": "sahst fern",
+        "er/sie/es": "sah fern",
+        "wir": "sahen fern",
+        "ihr": "saht fern",
+        "sie/Sie": "sahen fern"
+      },
+      "perfekt": {
+        "ich": "habe ferngesehen",
+        "du": "hast ferngesehen",
+        "er/sie/es": "hat ferngesehen",
+        "wir": "haben ferngesehen",
+        "ihr": "habt ferngesehen",
+        "sie/Sie": "haben ferngesehen"
+      },
+      "konjunktiv2": {
+        "ich": "sähe fern",
+        "du": "sähest fern",
+        "er/sie/es": "sähe fern",
+        "wir": "sähen fern",
+        "ihr": "sähet fern",
+        "sie/Sie": "sähen fern"
       }
     }
   },
@@ -229,6 +648,53 @@
       }
     }
   },
+  "lesen": {
+    "addedAt": "2026-04-13T21:40:44.358Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "читать, прочитать",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/lesen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3",
+    "hauptformen": {
+      "text": "liest · las · hat gelesen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "lese",
+        "du": "liest",
+        "er/sie/es": "liest",
+        "wir": "lesen",
+        "ihr": "lest",
+        "sie/Sie": "lesen"
+      },
+      "praeteritum": {
+        "ich": "las",
+        "du": "lasest",
+        "er/sie/es": "las",
+        "wir": "lasen",
+        "ihr": "laset",
+        "sie/Sie": "lasen"
+      },
+      "perfekt": {
+        "ich": "habe gelesen",
+        "du": "hast gelesen",
+        "er/sie/es": "hat gelesen",
+        "wir": "haben gelesen",
+        "ihr": "habt gelesen",
+        "sie/Sie": "haben gelesen"
+      },
+      "konjunktiv2": {
+        "ich": "läse",
+        "du": "läsest",
+        "er/sie/es": "läse",
+        "wir": "läsen",
+        "ihr": "läset",
+        "sie/Sie": "läsen"
+      }
+    }
+  },
   "mitbringen": {
     "niveau": "A1",
     "typ": "unregelmäßig",
@@ -318,6 +784,53 @@
         "wir": "schliefen",
         "ihr": "schliefet",
         "sie/Sie": "schliefen"
+      }
+    }
+  },
+  "sehen": {
+    "addedAt": "2026-04-13T21:40:35.637Z",
+    "niveau": "A1",
+    "typ": "unregelmäßig",
+    "hilfsverb": "haben",
+    "bedeutung": "смотреть, видеть",
+    "mp3": "https://www.verbformen.de/konjugation/infinitiv/sehen.mp3",
+    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3",
+    "hauptformen": {
+      "text": "sieht · sah · hat gesehen",
+      "mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3"
+    },
+    "tabelle": {
+      "praesens": {
+        "ich": "sehe",
+        "du": "siehst",
+        "er/sie/es": "sieht",
+        "wir": "sehen",
+        "ihr": "seht",
+        "sie/Sie": "sehen"
+      },
+      "praeteritum": {
+        "ich": "sah",
+        "du": "sahst",
+        "er/sie/es": "sah",
+        "wir": "sahen",
+        "ihr": "saht",
+        "sie/Sie": "sahen"
+      },
+      "perfekt": {
+        "ich": "habe gesehen",
+        "du": "hast gesehen",
+        "er/sie/es": "hat gesehen",
+        "wir": "haben gesehen",
+        "ihr": "habt gesehen",
+        "sie/Sie": "haben gesehen"
+      },
+      "konjunktiv2": {
+        "ich": "sähe",
+        "du": "sähest",
+        "er/sie/es": "sähe",
+        "wir": "sähen",
+        "ihr": "sähet",
+        "sie/Sie": "sähen"
       }
     }
   },
@@ -413,381 +926,6 @@
       }
     }
   },
-  "aufwachen": {
-    "niveau": "B1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "sein",
-    "bedeutung": "просыпаться, пробуждаться",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/aufwachen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3",
-    "hauptformen": {
-      "text": "wacht auf · wachte auf · ist aufgewacht",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/aufwachen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "wache auf",
-        "du": "wachst auf",
-        "er/sie/es": "wacht auf",
-        "wir": "wachen auf",
-        "ihr": "wacht auf",
-        "sie/Sie": "wachen auf"
-      },
-      "praeteritum": {
-        "ich": "wachte auf",
-        "du": "wachtest auf",
-        "er/sie/es": "wachte auf",
-        "wir": "wachten auf",
-        "ihr": "wachtet auf",
-        "sie/Sie": "wachten auf"
-      },
-      "perfekt": {
-        "ich": "bin aufgewacht",
-        "du": "bist aufgewacht",
-        "er/sie/es": "ist aufgewacht",
-        "wir": "sind aufgewacht",
-        "ihr": "seid aufgewacht",
-        "sie/Sie": "sind aufgewacht"
-      },
-      "konjunktiv2": {
-        "ich": "wachte auf",
-        "du": "wachtest auf",
-        "er/sie/es": "wachte auf",
-        "wir": "wachten auf",
-        "ihr": "wachtet auf",
-        "sie/Sie": "wachten auf"
-      }
-    }
-  },
-  "einkaufen": {
-    "addedAt": "2026-04-13T21:04:52.661Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "покупать, делать покупки",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/einkaufen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3",
-    "hauptformen": {
-      "text": "kauft ein · kaufte ein · hat eingekauft",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/einkaufen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "kaufe ein",
-        "du": "kaufst ein",
-        "er/sie/es": "kauft ein",
-        "wir": "kaufen ein",
-        "ihr": "kauft ein",
-        "sie/Sie": "kaufen ein"
-      },
-      "praeteritum": {
-        "ich": "kaufte ein",
-        "du": "kauftest ein",
-        "er/sie/es": "kaufte ein",
-        "wir": "kauften ein",
-        "ihr": "kauftet ein",
-        "sie/Sie": "kauften ein"
-      },
-      "perfekt": {
-        "ich": "habe eingekauft",
-        "du": "hast eingekauft",
-        "er/sie/es": "hat eingekauft",
-        "wir": "haben eingekauft",
-        "ihr": "habt eingekauft",
-        "sie/Sie": "haben eingekauft"
-      },
-      "konjunktiv2": {
-        "ich": "kaufte ein",
-        "du": "kauftest ein",
-        "er/sie/es": "kaufte ein",
-        "wir": "kauften ein",
-        "ihr": "kauftet ein",
-        "sie/Sie": "kauften ein"
-      }
-    }
-  },
-  "fernsehen": {
-    "addedAt": "2026-04-13T21:05:52.773Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "посмотреть телевизор, смотреть",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fernsehen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3",
-    "hauptformen": {
-      "text": "sieht fern · sah fern · hat ferngesehen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/fernsehen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "sehe fern",
-        "du": "siehst fern",
-        "er/sie/es": "sieht fern",
-        "wir": "sehen fern",
-        "ihr": "seht fern",
-        "sie/Sie": "sehen fern"
-      },
-      "praeteritum": {
-        "ich": "sah fern",
-        "du": "sahst fern",
-        "er/sie/es": "sah fern",
-        "wir": "sahen fern",
-        "ihr": "saht fern",
-        "sie/Sie": "sahen fern"
-      },
-      "perfekt": {
-        "ich": "habe ferngesehen",
-        "du": "hast ferngesehen",
-        "er/sie/es": "hat ferngesehen",
-        "wir": "haben ferngesehen",
-        "ihr": "habt ferngesehen",
-        "sie/Sie": "haben ferngesehen"
-      },
-      "konjunktiv2": {
-        "ich": "sähe fern",
-        "du": "sähest fern",
-        "er/sie/es": "sähe fern",
-        "wir": "sähen fern",
-        "ihr": "sähet fern",
-        "sie/Sie": "sähen fern"
-      }
-    }
-  },
-  "ausgehen": {
-    "addedAt": "2026-04-13T21:06:48.051Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "sein",
-    "bedeutung": "выходить, заканчиваться",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausgehen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3",
-    "hauptformen": {
-      "text": "geht aus · ging aus · ist ausgegangen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausgehen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "gehe aus",
-        "du": "gehst aus",
-        "er/sie/es": "geht aus",
-        "wir": "gehen aus",
-        "ihr": "geht aus",
-        "sie/Sie": "gehen aus"
-      },
-      "praeteritum": {
-        "ich": "ging aus",
-        "du": "gingst aus",
-        "er/sie/es": "ging aus",
-        "wir": "gingen aus",
-        "ihr": "gingt aus",
-        "sie/Sie": "gingen aus"
-      },
-      "perfekt": {
-        "ich": "bin ausgegangen",
-        "du": "bist ausgegangen",
-        "er/sie/es": "ist ausgegangen",
-        "wir": "sind ausgegangen",
-        "ihr": "seid ausgegangen",
-        "sie/Sie": "sind ausgegangen"
-      },
-      "konjunktiv2": {
-        "ich": "ginge aus",
-        "du": "gingest aus",
-        "er/sie/es": "ginge aus",
-        "wir": "gingen aus",
-        "ihr": "ginget aus",
-        "sie/Sie": "gingen aus"
-      }
-    }
-  },
-  "anrufen": {
-    "addedAt": "2026-04-13T21:07:58.323Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "звонить, позвонить",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/anrufen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3",
-    "hauptformen": {
-      "text": "ruft an · rief an · hat angerufen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/anrufen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "rufe an",
-        "du": "rufst an",
-        "er/sie/es": "ruft an",
-        "wir": "rufen an",
-        "ihr": "ruft an",
-        "sie/Sie": "rufen an"
-      },
-      "praeteritum": {
-        "ich": "rief an",
-        "du": "riefst an",
-        "er/sie/es": "rief an",
-        "wir": "riefen an",
-        "ihr": "rieft an",
-        "sie/Sie": "riefen an"
-      },
-      "perfekt": {
-        "ich": "habe angerufen",
-        "du": "hast angerufen",
-        "er/sie/es": "hat angerufen",
-        "wir": "haben angerufen",
-        "ihr": "habt angerufen",
-        "sie/Sie": "haben angerufen"
-      },
-      "konjunktiv2": {
-        "ich": "riefe an",
-        "du": "riefest an",
-        "er/sie/es": "riefe an",
-        "wir": "riefen an",
-        "ihr": "riefet an",
-        "sie/Sie": "riefen an"
-      }
-    }
-  },
-  "ausschlafen": {
-    "addedAt": "2026-04-13T21:09:13.954Z",
-    "niveau": "A2",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "выспаться, высыпаться",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/ausschlafen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3",
-    "hauptformen": {
-      "text": "schläft aus · schlief aus · hat ausgeschlafen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/ausschlafen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "schlafe aus",
-        "du": "schläfst aus",
-        "er/sie/es": "schläft aus",
-        "wir": "schlafen aus",
-        "ihr": "schlaft aus",
-        "sie/Sie": "schlafen aus"
-      },
-      "praeteritum": {
-        "ich": "schlief aus",
-        "du": "schliefst aus",
-        "er/sie/es": "schlief aus",
-        "wir": "schliefen aus",
-        "ihr": "schlieft aus",
-        "sie/Sie": "schliefen aus"
-      },
-      "perfekt": {
-        "ich": "habe ausgeschlafen",
-        "du": "hast ausgeschlafen",
-        "er/sie/es": "hat ausgeschlafen",
-        "wir": "haben ausgeschlafen",
-        "ihr": "habt ausgeschlafen",
-        "sie/Sie": "haben ausgeschlafen"
-      },
-      "konjunktiv2": {
-        "ich": "schliefe aus",
-        "du": "schliefest aus",
-        "er/sie/es": "schliefe aus",
-        "wir": "schliefen aus",
-        "ihr": "schliefet aus",
-        "sie/Sie": "schliefen aus"
-      }
-    }
-  },
-  "fahren": {
-    "addedAt": "2026-04-13T21:36:58.158Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "водить, везти",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/fahren_hat.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3",
-    "hauptformen": {
-      "text": "fährt · fuhr · hat gefahren",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/fahren_hat.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "fahre",
-        "du": "fährst",
-        "er/sie/es": "fährt",
-        "wir": "fahren",
-        "ihr": "fahrt",
-        "sie/Sie": "fahren"
-      },
-      "praeteritum": {
-        "ich": "fuhr",
-        "du": "fuhrst",
-        "er/sie/es": "fuhr",
-        "wir": "fuhren",
-        "ihr": "fuhrt",
-        "sie/Sie": "fuhren"
-      },
-      "perfekt": {
-        "ich": "habe gefahren",
-        "du": "hast gefahren",
-        "er/sie/es": "hat gefahren",
-        "wir": "haben gefahren",
-        "ihr": "habt gefahren",
-        "sie/Sie": "haben gefahren"
-      },
-      "konjunktiv2": {
-        "ich": "führe",
-        "du": "führest",
-        "er/sie/es": "führe",
-        "wir": "führen",
-        "ihr": "führet",
-        "sie/Sie": "führen"
-      }
-    }
-  },
-  "essen": {
-    "addedAt": "2026-04-13T21:37:19.429Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "есть, питаться",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/essen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3",
-    "hauptformen": {
-      "text": "isst · aß · hat gegessen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/essen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "esse",
-        "du": "isst",
-        "er/sie/es": "isst",
-        "wir": "essen",
-        "ihr": "esst",
-        "sie/Sie": "essen"
-      },
-      "praeteritum": {
-        "ich": "aß",
-        "du": "aßest",
-        "er/sie/es": "aß",
-        "wir": "aßen",
-        "ihr": "aßet",
-        "sie/Sie": "aßen"
-      },
-      "perfekt": {
-        "ich": "habe gegessen",
-        "du": "hast gegessen",
-        "er/sie/es": "hat gegessen",
-        "wir": "haben gegessen",
-        "ihr": "habt gegessen",
-        "sie/Sie": "haben gegessen"
-      },
-      "konjunktiv2": {
-        "ich": "äße",
-        "du": "äßest",
-        "er/sie/es": "äße",
-        "wir": "äßen",
-        "ihr": "äßet",
-        "sie/Sie": "äßen"
-      }
-    }
-  },
   "waschen": {
     "addedAt": "2026-04-13T21:39:11.384Z",
     "niveau": "A1",
@@ -832,100 +970,6 @@
         "wir": "wüschen",
         "ihr": "wüschet",
         "sie/Sie": "wüschen"
-      }
-    }
-  },
-  "sehen": {
-    "addedAt": "2026-04-13T21:40:35.637Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "смотреть, видеть",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/sehen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3",
-    "hauptformen": {
-      "text": "sieht · sah · hat gesehen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/sehen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "sehe",
-        "du": "siehst",
-        "er/sie/es": "sieht",
-        "wir": "sehen",
-        "ihr": "seht",
-        "sie/Sie": "sehen"
-      },
-      "praeteritum": {
-        "ich": "sah",
-        "du": "sahst",
-        "er/sie/es": "sah",
-        "wir": "sahen",
-        "ihr": "saht",
-        "sie/Sie": "sahen"
-      },
-      "perfekt": {
-        "ich": "habe gesehen",
-        "du": "hast gesehen",
-        "er/sie/es": "hat gesehen",
-        "wir": "haben gesehen",
-        "ihr": "habt gesehen",
-        "sie/Sie": "haben gesehen"
-      },
-      "konjunktiv2": {
-        "ich": "sähe",
-        "du": "sähest",
-        "er/sie/es": "sähe",
-        "wir": "sähen",
-        "ihr": "sähet",
-        "sie/Sie": "sähen"
-      }
-    }
-  },
-  "lesen": {
-    "addedAt": "2026-04-13T21:40:44.358Z",
-    "niveau": "A1",
-    "typ": "unregelmäßig",
-    "hilfsverb": "haben",
-    "bedeutung": "читать, прочитать",
-    "mp3": "https://www.verbformen.de/konjugation/infinitiv/lesen.mp3",
-    "stammformen_mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3",
-    "hauptformen": {
-      "text": "liest · las · hat gelesen",
-      "mp3": "https://www.verbformen.de/konjugation/stammformen/lesen.mp3"
-    },
-    "tabelle": {
-      "praesens": {
-        "ich": "lese",
-        "du": "liest",
-        "er/sie/es": "liest",
-        "wir": "lesen",
-        "ihr": "lest",
-        "sie/Sie": "lesen"
-      },
-      "praeteritum": {
-        "ich": "las",
-        "du": "lasest",
-        "er/sie/es": "las",
-        "wir": "lasen",
-        "ihr": "laset",
-        "sie/Sie": "lasen"
-      },
-      "perfekt": {
-        "ich": "habe gelesen",
-        "du": "hast gelesen",
-        "er/sie/es": "hat gelesen",
-        "wir": "haben gelesen",
-        "ihr": "habt gelesen",
-        "sie/Sie": "haben gelesen"
-      },
-      "konjunktiv2": {
-        "ich": "läse",
-        "du": "läsest",
-        "er/sie/es": "läse",
-        "wir": "läsen",
-        "ihr": "läset",
-        "sie/Sie": "läsen"
       }
     }
   }
